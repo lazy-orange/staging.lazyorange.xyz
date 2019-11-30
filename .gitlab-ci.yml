@@ -7,7 +7,7 @@ variables:
   HELMFILE_VERSION: v0.89.0 # https://github.com/roboll/helmfile/releases
   TERRAFORM_VERSION: 0.12.13 # https://releases.hashicorp.com/terraform/
   TERRAFORM_EKS_DIR: ./terraform/aws-eks
-  TERRAFORM_EKS_VARS: $TERRAFORM_EKS_DIR/fixtures.eu-central-1.tfvars
+  TERRAFORM_EKS_VARS: $TERRAFORM_EKS_DIR/eu-central-1.tfvars
   KUBEHOME_DIR: $CI_PROJECT_DIR/.kube
   KUBECONFIG: $CI_PROJECT_DIR/.kube/config
   PLAN: plan.tfplan
