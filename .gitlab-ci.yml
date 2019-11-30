@@ -121,6 +121,7 @@ docker-build-master:
   - helm tiller install
   - helm tiller start-ci
   - helmfile -v
+  - helmfile deps
 
 # Heavily used by included gitlab templates
 .general:
