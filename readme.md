@@ -14,8 +14,8 @@ This module was designed to use within *staging* environment.
 In order to use for production environment you should clone this repo and rename to *production.your_domain*, change a few terraform variables and push changes to a remote origin.
 
 The module supports the following:
-- The module creates an AWS EKS cluster for you and add to [Kubernetes clusters](https://docs.gitlab.com/ee/user/group/clusters/#overview) for your GitLab group
-- IAM Role with specified policy will be mapped to the cluster-autoscaler service account in kube-system namespace
+- The module creates an AWS EKS cluster for you and adds to [Kubernetes clusters](https://docs.gitlab.com/ee/user/group/clusters/#overview) to the GitLab group
+- IAM Role with specified policy for the cluster-autoscaler service account in kube-system namespace
 - Dedicated node group for Gitlab Runner with [scaling a node group to 0](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#scaling-a-node-group-to-0) configuration
 - A collection of helmfiles to setup **Gitlab Runner**, **Cluster AutoScaler**, **CertManager**, **NGINX Ingress Contoller**
 
