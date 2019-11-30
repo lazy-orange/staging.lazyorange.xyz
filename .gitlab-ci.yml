@@ -21,7 +21,7 @@ variables:
   # helmfiles
   GITLAB_RUNNER_INSTALLED: "true"
   # helmfile environment variables
-  CREATE_NAMESPACE_IF_MISSING: "false" # indicate whether the namespace should be created if it does not exist
+  CREATE_NAMESPACE_IF_MISSING: "true" # indicate whether the namespace should be created if it does not exist
   HELM_HOST: localhost:44134
   TILLER_NAMESPACE: tillerless
 
@@ -82,8 +82,6 @@ apply:
   - plan
   when: manual
   allow_failure: false
-  only:
-  - master
 
 # Builds the docker image, includes tools that might you want to use on the next stages
 # Notice, that the $CI_IMAGE_NAME enviroment variables will be used in the next stage and 
