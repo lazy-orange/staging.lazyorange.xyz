@@ -6,18 +6,18 @@
 # - https://github.com/cloudposse/terraform-aws-tfstate-backend#usage
 # - https://github.com/cloudposse/terraform-aws-tfstate-backend/releases
 
-module "terraform_state_backend" {
-  source     = "git::https://github.com/cloudposse/terraform-aws-tfstate-backend.git?ref=0.9.0"
-  namespace  = var.namespace
-  stage      = var.stage
-  region     = var.region
-  name       = "terraform-gitlab"
-  attributes = ["state"]
-}
+// module "terraform_state_backend" {
+//   source     = "git::https://github.com/cloudposse/terraform-aws-tfstate-backend.git?ref=0.9.0"
+//   namespace  = var.namespace
+//   stage      = var.stage
+//   region     = var.region
+//   name       = "terraform-gitlab"
+//   attributes = ["state"]
+// }
 
-output "terraform_backend_config" {
-  value = module.terraform_state_backend.terraform_backend_config
-}
+// output "terraform_backend_config" {
+//   value = module.terraform_state_backend.terraform_backend_config
+// }
 
 terraform {
   required_version = ">= 0.12.2"
