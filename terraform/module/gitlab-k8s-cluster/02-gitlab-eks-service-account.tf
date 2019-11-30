@@ -27,3 +27,9 @@ resource "kubernetes_cluster_role_binding" "eks_admin_cluster_role_binding" {
     namespace = "kube-system"
   }
 }
+
+resource "kubernetes_namespace" "tillerless" {
+  metadata {
+    name = "tillerless"
+  }
+}
