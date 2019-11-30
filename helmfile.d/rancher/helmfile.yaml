@@ -1,0 +1,26 @@
+repositories:
+# Add the Rancher Helm repository
+- name: rancher-stable
+  url: "https://releases.rancher.com/server-charts/stable"
+
+releases:
+- name: "rancher"
+  namespace: "cattle-system"
+  labels:
+    chart: "rancher"
+    repo: "stable"
+    component: "rancher"
+    namespace: "cattle-system"
+    vendor: "rancher"
+    default: "false"
+  chart: "rancher-stable/rancher"
+  version: "v2.1.8"
+  wait: true
+  values:
+    - hostname: rancher.infra.lazyorange.xyz
+      ingress:
+        tls:
+          # source: rancher
+          source: letsEncrypt
+      letsEncrypt:
+        email: devops@lazyorange.xyz

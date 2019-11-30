@@ -1,0 +1,26 @@
+#  Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+**/.idea
+**/*.iml
+
+**/.build-harness
+**/build-harness
+
+# Rendered yaml config
+**/configmap-auth.
+
+# Kubernetes configs
+.kube
+
+**/.tmp/*
+
+.env
+.env.*
+!.env.example
+
+terraform/aws-eks/terraform-aws-external-dns/

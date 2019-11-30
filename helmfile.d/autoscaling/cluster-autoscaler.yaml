@@ -1,0 +1,78 @@
+repositories:
+# Stable repo of official helm charts
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+
+releases:
+
+################################################################################
+## cluster-autoscaler       ####################################################
+################################################################################
+
+#
+# References:
+#   - https://github.com/helm/charts/tree/master/stable/cluster-autoscaler
+#   - https://github.com/helm/charts/blob/master/stable/cluster-autoscaler/values.yaml
+#   - https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler
+#   - https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#auto-discovery-setup
+#
+- name: "cluster-autoscaler"
+  namespace: "kube-system"
+  labels:
+    chart: "cluster-autoscaler"
+    repo: "stable"
+    namespace: "kube-system"
+    vendor: "kubernetes"
+  chart: "stable/cluster-autoscaler"
+  version: "6.2.0"
+  wait: true
+  installed: {{ env "CLUSTER_AUTOSCALER_INSTALLED" | default "true" }}
+  values:
+    - image:
+        ### Optional: CLUSTER_AUTOSCALER_IMAGE_TAG;
+        tag: '{{ env "CLUSTER_AUTOSCALER_IMAGE_TAG" | default "v1.13.8" }}'
+      autoDiscovery:
+        ### Required: KOPS_CLUSTER_NAME; e.g. cluster.k8s.local
+        clusterName: '{{ coalesce (env "EKS_CLUSTER_NAME") (env "KOPS_CLUSTER_NAME") }}'
+      cloudProvider: aws
+      awsRegion: '{{ coalesce (env "CLUSTER_AWS_REGION") (env "AWS_REGION") (env "AWS_DEFAULT_REGION") }}'
+      extraArgs:
+        # Only a few of the parameters described at https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md
+        # are supported by the chart. The rest need to be explicitly added.
+        expander: most-pods
+        balance-similar-node-groups: "true"
+      #
+      sslCertPath: /etc/kubernetes/pki/ca.crt
+      sslCertHostPath: /etc/ssl/certs/ca-certificates.crt
+      #
+      fullnameOverride: cluster-autoscaler
+      #
+      rbac:
+        ## If true, create & use RBAC resources
+        ##
+        ### Optional: RBAC_ENABLED;
+        create: {{ env "RBAC_ENABLED" | default "true" }}
+        ## If true, create & use Pod Security Policy resources
+        ## https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+        ### Optional: CLUSTER_AUTOSCALER_RBAC_PSP_ENABLED;
+        ## Requires rbac.create true
+        pspEnabled: {{ coalesce (env "CLUSTER_AUTOSCALER_RBAC_PSP_ENABLED") ( env "RBAC_ENABLED" ) "false" }}
+        ##
+        ### Optional: CLUSTER_AUTOSCALER_RBAC_SERVICE_ACCOUNT_NAME;
+        serviceAccountName: '{{ env "CLUSTER_AUTOSCALER_RBAC_SERVICE_ACCOUNT_NAME" | default "default" }}'
+        ##
+        {{- if coalesce (env "CLUSTER_AUTOSCALER_IAM_ROLE_NAME") (env "KUBERNETES_AUTOSCALER_IAM_ROLE_NAME") }}
+        serviceAccountAnnotations:
+          eks.amazonaws.com/role-arn: '{{ coalesce (env "CLUSTER_AUTOSCALER_IAM_ROLE_NAME") (env "KUBERNETES_AUTOSCALER_IAM_ROLE_NAME") }}'
+        {{- end }}
+      # Deply the autoscaler on a master node, so that it does not kill itself 
+      # tolerations:
+      #   - effect: NoSchedule
+      #     operator: "Exists"
+      #     key: node-role.kubernetes.io/master
+      # nodeSelector:
+      #   kubernetes.io/role: master
+      # {{- if coalesce (env "CLUSTER_AUTOSCALER_IAM_ROLE_NAME") (env "KUBERNETES_AUTOSCALER_IAM_ROLE_NAME") }}
+      # podAnnotations:
+      #   iam.amazonaws.com/role: '{{ coalesce (env "CLUSTER_AUTOSCALER_IAM_ROLE_NAME") (env "KUBERNETES_AUTOSCALER_IAM_ROLE_NAME") }}'
+      # {{- end }}

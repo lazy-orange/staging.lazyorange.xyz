@@ -1,0 +1,84 @@
+repositories:
+# Stable repo of official helm charts
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+
+releases:
+################################################################################
+## External DNS ################################################################
+################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/charts/blob/master/stable/external-dns/values.yaml
+#   - https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md
+#
+- name: "dns"
+  namespace: "kube-system"
+  labels:
+    chart: "external-dns"
+    repo: "stable"
+    component: "ingress"
+    namespace: "kube-system"
+    vendor: "kubernetes-incubator"
+    default: "true"
+  chart: "stable/external-dns"
+  version: "2.10.1"
+  wait: true
+  # Doesn't work properly on AWS EKS with ELB 
+  # https://github.com/kubernetes-sigs/external-dns/issues/1276
+  installed: {{ env "EXTERNAL_DNS_INSTALLED" | default "false" }}
+  values:
+    - sources:
+      - ingress
+{{- if env "EXTERNAL_DNS_CRD_ENABLED" | default "false" | eq "true" }}
+      - crd
+{{- end }}
+      ### Required: EXTERNAL_DNS_TXT_OWNER_ID; e.g. us-west-2.staging.cloudposse.org
+      txtOwnerId: '{{ env "EXTERNAL_DNS_TXT_OWNER_ID" }}'
+      ### Required: EXTERNAL_DNS_TXT_PREFIX; e.g. 11591833-F9CE-407C-8519-35A947DB1D87-
+      # txtPrefix: '{{ env "EXTERNAL_DNS_TXT_PREFIX" }}'
+      publishInternalServices: true
+      ### Optional: EXTERNAL_DNS_POLICY Modify (options: sync, upsert-only )
+      policy: '{{ env "EXTERNAL_DNS_POLICY" | default "upsert-only" }}'
+      provider: '{{ env "EXTERNAL_DNS_PROVIDER" | default "aws" }}'
+{{ if env "EXTERNAL_DNS_PROVIDER" | default "aws" | eq "aws" }}
+      aws:
+        preferCNAME: "true"
+{{ end }}
+{{ if env "EXTERNAL_DNS_PROVIDER" | default "aws" | eq "cloudflare" }}
+      cloudflare:
+        apiKey: '{{ env "EXTERNAL_DNS_CLOUDFLARE_API_KEY" }}'
+        email: '{{ env "EXTERNAL_DNS_CLOUDFLARE_EMAIL" }}'
+{{ end }}
+      podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        {{- if env "EXTERNAL_DNS_PROVIDER" | default "aws" | eq "aws" }}
+        ### Required: EXTERNAL_DNS_IAM_ROLE; e.g. cp-staging-external-dns
+        iam.amazonaws.com/role: '{{ env "EXTERNAL_DNS_IAM_ROLE" }}'
+        {{- end }}
+      crd:
+        ## Install and use the integrated DNSEndpoint CRD
+        create: {{ env "EXTERNAL_DNS_CRD_ENABLED" | default "false" | quote }}
+      resources:
+        limits:
+          cpu: '{{ env "EXTERNAL_DNS_LIMIT_CPU" | default "200m" }}'
+          memory: '{{ env "EXTERNAL_DNS_LIMIT_MEMORY" | default "256Mi" }}'
+        requests:
+          cpu: '{{ env "EXTERNAL_DNS_REQUEST_CPU" | default "100m" }}'
+          memory: '{{ env "EXTERNAL_DNS_REQUEST_MEMORY" | default "128Mi" }}'
+      rbac:
+        ## If true, create & use RBAC resources
+        ##
+        ### Optional: RBAC_ENABLED;
+        create: {{ env "RBAC_ENABLED" | default "false" }}
+        ## Ignored if rbac.create is true
+        ##
+        ### Optional: EXTERNAL_DNS_RBAC_SERVICE_ACCOUNT_NAME;
+        serviceAccountName: '{{ env "EXTERNAL_DNS_RBAC_SERVICE_ACCOUNT_NAME" | default "default" }}'
+      # Run pods on nodes with the "external-dns-enabled" label 
+      # The permissions must be attached to role used by the node group to be able to perform API call to AWS Route53 service
+      # - https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md#iam-permissions
+      # nodeSelector:
+      #   external-dns-enabled: "yes"
+      replicas: 3

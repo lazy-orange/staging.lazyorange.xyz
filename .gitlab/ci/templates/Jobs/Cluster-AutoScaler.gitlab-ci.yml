@@ -1,0 +1,18 @@
+#
+# References:
+#   - https://github.com/helm/charts/tree/master/stable/cluster-autoscaler
+#
+deploy_cluster_autosclaler:
+  stage: infra
+  extends:
+  - .auto-configure
+  - .before-script
+  - .general
+  only:
+   variables:
+   - $CLUSTER_AUTOSCALER_INSTALLED
+   - $CLUSTER_AUTOSCALER_RBAC_SERVICE_ACCOUNT_NAME
+   - $CLUSTER_AUTOSCALER_IAM_ROLE_NAME
+  script:
+  - helmfile -l chart=cluster-autoscaler list
+  - helm tiller run -- helmfile -l chart=cluster-autoscaler sync --skip-deps

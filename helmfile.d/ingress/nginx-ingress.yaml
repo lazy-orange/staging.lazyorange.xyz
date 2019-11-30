@@ -1,0 +1,211 @@
+repositories:
+# Stable repo of official helm charts
+- name: "stable"
+  url: "https://kubernetes-charts.storage.googleapis.com"
+# Cloud Posse incubator repo of helm charts
+- name: "cloudposse-incubator"
+  url: "https://charts.cloudposse.com/incubator/"
+
+
+releases:
+
+################################################################################
+## NGINX Ingress Controller ####################################################
+################################################################################
+
+#
+# References:
+#   - https://github.com/helm/charts/blob/master/stable/nginx-ingress/values.yaml
+#
+
+{{ $client_errors := env "NGINX_INGRESS_CUSTOM_CLIENTS_ERRORS" | default "403,404" | splitList "," }}
+{{ $server_errors := env "NGINX_INGRESS_CUSTOM_SERVER_ERRORS" | default "500,501,502,503,504" | splitList "," }}
+
+- name: "ingress"
+  namespace: "ingress"
+  labels:
+    chart: "nginx-ingress"
+    repo: "stable"
+    component: "ingress"
+    namespace: "ingress"
+    vendor: "kubernetes"
+    default: "true"
+  chart: "stable/nginx-ingress"
+  version: "1.24.6"
+  wait: true
+  installed: {{ env "NGINX_INGRESS_INSTALLED" | default "false" }}
+  values:
+    - controller:
+        image:
+          repository: "quay.io/kubernetes-ingress-controller/nginx-ingress-controller"
+          ### Optional: NGINX_INGRESS_IMAGE_TAG; e.g. 0.25.1
+          tag: '{{ env "NGINX_INGRESS_IMAGE_TAG" | default "0.26.1" }}'
+          pullPolicy: "IfNotPresent"
+        ### Optional: NGINX_INGRESS_REPLICA_COUNT; Used only if `kind=Deployment` e.g. 4
+        replicaCount: '{{ env "NGINX_INGRESS_REPLICA_COUNT" | default "1" }}'
+        enableHttps: true
+        resources:
+          limits:
+            cpu: '{{ env "NGINX_INGRESS_LIMIT_CPU" | default "200m" }}'
+            memory: '{{ env "NGINX_INGRESS_LIMIT_MEMORY" | default "256Mi" }}'
+          requests:
+            cpu: '{{ env "NGINX_INGRESS_REQUEST_CPU" | default "50m" }}'
+            memory: '{{ env "NGINX_INGRESS_REQUEST_MEMORY" | default "128Mi" }}'
+        ## Optional: NGINX_INGRESS_KIND; Valid values: DaemonSet or Deployment
+        kind: '{{ env "NGINX_INGRESS_KIND" | default "Deployment" }}'
+        # defaultBackendService: "kube-system/ingress-backend-default"
+        ingressClass: '{{ env "NGINX_INGRESS_CLASS" | default "nginx" }}'
+        config:
+          # custom-http-errors: '{{ join "," $client_errors }},{{ join "," $server_errors }}'
+          use-proxy-protocol: '{{ env "NGINX_INGRESS_USE_PROXY_PROTOCOL" | default "false" }}'
+        service:
+          externalTrafficPolicy: '{{ env "NGINX_INGRESS_EXTERNAL_TRAFFIC_POLICY" | default "Cluster" }}'
+          annotations:
+            ### Required: NGINX_INGRESS_HOSTNAME; e.g. ingress.us-west-2.cloudposse.org
+            external-dns.alpha.kubernetes.io/hostname: '{{ env "NGINX_INGRESS_HOSTNAME" }}'
+            ### Optional: NGINX_INGRESS_TTL; e.g. 60
+            external-dns.alpha.kubernetes.io/ttl: '{{ env "NGINX_INGRESS_TTL" | default "60" }}'
+            ### Network Load Balancer to be able to get Client IP
+            {{- if eq ( env "NGINX_INGRESS_NLB_ENABLED" | default "false" ) "true" }}
+            service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+            # service.beta.kubernetes.io/aws-load-balancer-internal: "0.0.0.0/0"
+            {{- end }}
+            {{- if eq ( env "NGINX_INGRESS_USE_PROXY_PROTOCOL" | default "false" ) "true" }}
+            service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
+            {{- end }}
+        updateStrategy:
+          rollingUpdate:
+            maxUnavailable: 1
+          type: RollingUpdate
+        metrics:
+          enabled: {{ env "NGINX_INGRESS_METRICS_ENABLED" | default "false" }}
+          serviceMonitor:
+            enabled: {{ env "NGINX_INGRESS_METRICS_ENABLED" | default "false" }}
+          {{- if eq (env "NGINX_INGRESS_PROMETHEUS_RULE_ENABLED" | default "true") "true" }}
+          prometheusRule:
+            enabled: {{ env "NGINX_INGRESS_METRICS_ENABLED" | default "false" }}
+            rules:
+              - alert: NginxIngressControllerError
+                annotations:
+                  description: Nginx ingress controller error
+                  summary: NginxIngressControllerError
+                expr: nginx_ingress_controller_requests > {{ env "NGINX_INGRESS_METRICS_CONTROLLER_ERROR_ALERT" | default "100000" }}
+                labels:
+                  severity: warning
+          {{- end }}
+      ### Regexp used to map
+      ### 8080:default/example-tcp-svc:9000,8081:staging/example-tcp-svc:9000
+      ### to
+      ### 8080: default/example-tcp-svc:9000
+      ### 8081: staging/example-tcp-svc:9000
+      ### Optional: NGINX_INGRESS_TCP; e.g. 8080:default/example-tcp-svc:9000,8081:staging/example-tcp-svc:9000
+      # tcp:
+      # {{- range env "NGINX_INGRESS_TCP" | splitList "," }}
+      #   {{ regexReplaceAll "(\\d*:)(.*)" . "$1 $2" }}
+      # {{- end }}
+      ### Regexp used to map
+      ### 8080:default/example-udp-svc:9000,8081:staging/example-udp-svc:9000
+      ### to
+      ### 8080: default/example-udp-svc:9000
+      ### 8081: staging/example-udp-svc:9000
+      ### Optional: NGINX_INGRESS_UDP; e.g. 8080:default/example-udp-svc:9000,8081:staging/example-udp-svc:9000
+      # udp:
+      # {{- range env "NGINX_INGRESS_UDP" | splitList "," }}
+      #   {{ regexReplaceAll "(\\d*:)(.*)" . "$1 $2" }}
+      # {{- end }}
+      defaultBackend:
+        enabled: true
+        name: default-backend
+        image:
+          repository: k8s.gcr.io/defaultbackend-amd64
+          tag: "1.5"
+          pullPolicy: IfNotPresent
+          # nobody user -> uid 65534
+          runAsUser: 65534
+      rbac:
+        ### Optional: RBAC_ENABLED;
+        create: {{ env "RBAC_ENABLED" | default "false" }}
+      serviceAccount:
+        ### Optional: RBAC_ENABLED;
+        create: {{ env "RBAC_ENABLED" | default "false" }}
+        ### Optional: NGINX_INGRESS_SERVICE_ACCOUNT_NAME;
+        name: '{{ env "NGINX_INGRESS_SERVICE_ACCOUNT_NAME" | default "" }}'
+        backend:
+          create: true
+
+- name: "ingress-backend"
+  namespace: "ingress"
+  labels:
+    chart: "nginx-default-backend"
+    component: "ingress"
+    namespace: "ingress"
+    vendor: "kubernetes"
+    default: "true"
+  chart: "cloudposse-incubator/nginx-default-backend"
+  version: "0.4.0"
+  wait: true
+  installed: {{ env "NGINX_INGRESS_BACKEND_INSTALLED" | default "true" }}
+  values:
+    - nameOverride: default
+      ### Optional: NGINX_INGRESS_BACKEND_REPLICA_COUNT; e.g. 2
+      ### Setting this to 1 can interfere with cluster auto-scaling
+      replicaCount: '{{ env "NGINX_INGRESS_BACKEND_REPLICA_COUNT" | default "2" }}'
+      resources:
+        limits:
+          cpu: '{{ env "NGINX_INGRESS_DEFAULT_BACKEND_LIMIT_CPU" | default "50m" }}'
+          memory: '{{ env "NGINX_INGRESS_DEFAULT_BACKEND_LIMIT_MEMORY" | default "24Mi" }}'
+        requests:
+          cpu: '{{ env "NGINX_INGRESS_DEFAULT_BACKEND_REQUEST_CPU" | default "1m" }}'
+          memory: '{{ env "NGINX_INGRESS_DEFAULT_BACKEND_REQUEST_MEMORY" | default "8Mi" }}'
+      errors:
+        configmap: default
+        default:
+          email: '{{ env "NGINX_INGRESS_SUPPORT_EMAIL" | default "hello@cloudposse.com" }}'
+          site: /
+        client:
+{{- range $status := $client_errors  }}
+        - "{{ $status }}"
+{{- end }}
+        server:
+{{- range $status := $server_errors  }}
+        - "{{ $status }}"
+{{- end }}
+
+#######################################################################################
+## ingress-monitoring                                                                ##
+## Integrates kube-prometheus and grafana with nginx ingress                         ##
+#######################################################################################
+
+#
+# References:
+#   - https://github.com/coreos/prometheus-operator/tree/master/helm/kube-prometheus
+#   - https://github.com/coreos/prometheus-operator/tree/master/contrib/kube-prometheus
+#   - https://prometheus.io/docs/alerting/configuration
+#   - https://medium.com/@timfpark/simple-kubernetes-cluster-monitoring-with-prometheus-and-grafana-dd27edb1641
+#   - https://www.weave.works/blog/monitoring-kubernetes-infrastructure
+#   - https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics
+#   - https://grafana.com/grafana
+#   - https://github.com/helm/charts/tree/master/stable/grafana
+#
+- name: "ingress-monitoring"
+  namespace: "monitoring"
+  labels:
+    chart: "monochart"
+    component: "monitoring"
+    namespace: "monitoring"
+    vendor: "cloudposse"
+    default: {{ env "NGINX_INGRESS_METRICS_ENABLED" | default "false" }}
+  chart: "cloudposse-incubator/monochart"
+  version: "0.10.0"
+  wait: true
+  # Unfortunately, you cannot split a go template statement across multiple lines, so this has to be one big long line
+  installed: {{ and (eq ( env "NGINX_INGRESS_METRICS_ENABLED" | default "false" ) "true") (eq ( env "NGINX_INGRESS_GRAFANA_DASHBOARD_ENABLED" | default "true" ) "true" ) }}
+  values:
+  - configMaps:
+      dashboards:
+        enabled: true
+        labels:
+          grafana_dashboard: "true"
+        files:
+          nginx-ingress.json: |
+{{ exec "curl" (list "-fsSL" (print "https://raw.githubusercontent.com/cloudposse/grafana-dashboards/" (env "GRAFANA_DASHBOARDS_VERSION" | default "1.0") "/nginx-ingress/nginx.json")) | indent 12 }}

@@ -1,0 +1,76 @@
+#
+# References:
+# - https://docs.gitlab.com/12.4/runner/install/kubernetes.html
+# - https://docs.gitlab.com/runner/executors/kubernetes.html#workflow
+# - https://gitlab.com/gitlab-org/charts/gitlab-runner/blob/master/values.yaml
+
+repositories:
+## Add the Gitlab Helm repository
+- name: gitlab
+  url: "https://charts.gitlab.io"
+
+releases:
+- name: "gitlab-runner"
+  namespace: "gitlab-runner"
+  labels:
+    chart: "gitlab-runner"
+    repo: "gitlab"
+    component: "gitlab-runner"
+    namespace: "gitlab-runner"
+    vendor: "gitlab"
+    default: "false"
+  chart: "gitlab/gitlab-runner"
+  # version: "v2.1.8"
+  installed: {{ env "GITLAB_RUNNER_INSTALLED" | default "false" }}
+  wait: true
+  values:
+    - runnerRegistrationToken: {{ env "GITLAB_RUNNER_TOKEN" | default "" }}
+      gitlabUrl: {{ env "GITLAB_URL" | default "https://gitlab.com" }}
+      runners:
+        ## Run all containers with the privileged flag enabled
+        ## This will allow the docker:dind image to run if you need to run Docker
+        ## commands. Please read the docs before turning this on:
+        ## ref: https://docs.gitlab.com/runner/executors/kubernetes.html#using-docker-dind
+        ##
+        privileged: true
+        ## Gitlab Runner will assign nodes with given labels
+        ## Always use a dedicated node group for gitlab runner jobs to avoid hurting other pods in the same nodes
+        nodeSelector:
+          purpose: gitlab-runner
+        builds:
+          limits:
+            memory: 1024Mi
+            cpu: 500m
+          requests:
+            memory: 64Mi
+            cpu: 100m
+      rbac:
+        create: true
+      #
+      resources:
+        limits:
+          memory: 512Mi
+          cpu: 500m
+        requests:
+          memory: 64Mi
+          cpu: 100m
+      ## Gitlab Runner should not be placed to Spot instances, use always regular nodes,
+      ## gitlab manager is responsible to handle placement of jobs and does not require a lot of resources
+      ## nodeSelector:
+      ##  purpose: gitlab-runner-manager
+      affinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: purpose
+              operator: NotIn
+              values:
+              - gitlab-runner
+        # preferredDuringSchedulingIgnoredDuringExecution:
+        # - weight: 1
+        #   preference:
+        #     matchExpressions:
+        #     - key: purpose
+        #       operator: NotIn
+        #       values:
+        #       - gitlab-runner

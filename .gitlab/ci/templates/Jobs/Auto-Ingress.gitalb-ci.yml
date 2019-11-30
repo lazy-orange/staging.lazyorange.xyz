@@ -1,0 +1,84 @@
+variables:
+  NGINX_INGRESS_HOSTNAME: $KUBE_INGRESS_BASE_DOMAIN # https://gitlab.com/help/user/project/clusters/index#base-domain
+
+.auto-configure:
+  image: $CI_IMAGE_NAME
+
+.before-script:
+  before_script:
+  - aws --version
+  - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+  - kubectl version
+  - helm version -c
+  - helm init -c
+  - helm plugin install https://github.com/rimusz/helm-tiller
+  - helm tiller install
+  - helm tiller start-ci
+  - helmfile -v
+
+.general:
+  only:
+    refs:
+    - master
+    variables:
+    - $EKS_CLUSTER_NAME
+    - $AWS_DEFAULT_REGION
+    - $AWS_ACCESS_KEY_ID
+    - $AWS_SECRET_ACCESS_KEY
+  dependencies:
+  - apply
+  tags:
+  - docker
+
+deploy_ingress:
+  stage: infra
+  extends:
+  - .auto-configure
+  - .before-script
+  - .general
+  variables:
+    RBAC_ENABLED: "true"
+    NGINX_INGRESS_NLB_ENABLED: "true"
+    NGINX_INGRESS_BACKEND_INSTALLED: "false"
+  script:
+  - helmfile -l component=ingress list
+  - helm tiller run -- helmfile -l component=ingress sync --skip-deps
+  only:
+    variables:
+    - $NGINX_INGRESS_INSTALLED
+    - $NGINX_INGRESS_HOSTNAME
+  
+deploy_certmanager:
+  stage: infra
+  extends:
+  - .auto-configure
+  - .before-script
+  - .general
+  variables:
+    CERT_MANAGER_INGRESS_SHIM_DEFAULT_ISSUER_NAME: letsencrypt-prod
+  script:
+  - export CERT_MANAGER_EMAIL=${CERT_MANAGER_EMAIL:-$GITLAB_USER_EMAIL}
+  - helmfile -l component=cert-manager list 
+  - helm tiller run -- helmfile -l component=cert-manager sync --skip-deps
+  only:
+    variables:
+    - $CERT_MANAGER_INSTALLED
+
+deploy_external_dns:
+  stage: infra
+  extends:
+  - .auto-configure
+  - .before-script
+  - .general
+  variables:
+    EXTERNAL_DNS_TXT_OWNER_ID: $KUBE_INGRESS_BASE_DOMAIN
+  script:
+  - helmfile -l chart=external-dns list
+  - helm tiller run -- helmfile -l chart=external-dns sync --skip-deps
+  only:
+    variables:
+    # In case if you decided to uninstall external-dns chart you must EXTERNAL_DNS_INSTALLED to false 
+    # instead of removing variable directly from CI variables
+    # then you should rerun Gitlab pipeline to remove the helm chart
+    # and then you can remove the EXTERNAL_DNS_INSTALLED variable from Gitlab CI/CD env variables
+    - $EXTERNAL_DNS_INSTALLED 

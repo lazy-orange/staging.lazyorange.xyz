@@ -1,0 +1,12 @@
+dependencies:
+- name: monochart
+  repository: https://charts.cloudposse.com/incubator/
+  version: 0.10.0
+- name: nginx-default-backend
+  repository: https://charts.cloudposse.com/incubator/
+  version: 0.4.0
+- name: nginx-ingress
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 1.24.6
+digest: sha256:6f4e676d4ba0d8b02d6b2f847827e6388edcab016ae30a3a0b29cc162d157db5
+generated: "2019-11-06T06:57:54.773823947Z"
