@@ -11,7 +11,7 @@ module "terraform_state_backend" {
   namespace  = var.namespace
   stage      = var.stage
   region     = var.region
-  name       = "terraform"
+  name       = "terraform-gitlab"
   attributes = ["state"]
 }
 
@@ -24,12 +24,11 @@ terraform {
 
   backend "s3" {
     region         = "eu-central-1"
-    bucket         = "lazyorange-staging-terraform-state"
+    bucket         = "lazyorange-staging-terraform-gitlab-state"
     key            = "terraform.tfstate"
-    dynamodb_table = "lazyorange-staging-terraform-state-lock"
+    dynamodb_table = "lazyorange-staging-terraform-gitlab-state-lock"
     profile        = ""
     role_arn       = ""
     encrypt        = "true"
   }
 }
-
