@@ -5,11 +5,9 @@ deploy_gitlab_runner:
   - .before-script
   - .general
   only:
-   variables:
-   - $GITLAB_RUNNER_INSTALLED
-   - $GITLAB_RUNNER_TOKEN
-  variables:
-    FOO: "bar"
+    variables:
+    - $GITLAB_RUNNER_INSTALLED
+    - $GITLAB_RUNNER_TOKEN
   script:
   - helmfile -l component=gitlab-runner list
   - helm tiller run -- helmfile -l component=gitlab-runner sync --skip-deps
