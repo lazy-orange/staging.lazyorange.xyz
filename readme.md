@@ -3,6 +3,8 @@
 A terraform configuration to create an AWS EKS cluster that can be connected 
 to your group clusters and then used across projects to use [Auto DevOps](https://docs.gitlab.com/ee/topics/autodevops/#overview) feature.
 
+This module under the hood uses this awesome [AWS EKS](https://github.com/cloudposse/terraform-aws-eks-cluster) module by CloudPosse :cloud: and many others modules which make it possible this project :heart:.
+
 ## Motivation 
 
 Manage the Kubernetes cluster and its dependencies can be hard, then when you is already familiar with main features provided by Gitlab and its integration with [AWS EKS](https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html#eks-cluster) and [Google Kubernetes Engine](https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html#gke-cluster), [Auto DevOps feature](https://docs.gitlab.com/ee/topics/autodevops/#overview), using Gitlab UI you will want to manage its dependices such [NGinx Ingress Controller](https://github.com/helm/charts/tree/master/stable/nginx-ingress), CertManager, Gitlab Runner, etc through [GitOps](https://www.weave.works/blog/practical-guide-gitops) with tools that you love and use on daily-basis, such [Helm](https://helm.sh) and [helmfile](https://github.com/roboll/helmfile) and use custom values and settings that fit to your needs.
@@ -14,10 +16,13 @@ This module was designed to use within *staging* environment.
 In order to use for production environment you should clone this repo and rename to *production.your_domain*, change a few terraform variables and push changes to a remote origin.
 
 The module supports the following:
-- The module creates an AWS EKS cluster for you and adds to [Kubernetes clusters](https://docs.gitlab.com/ee/user/group/clusters/#overview) to the GitLab group
+- The module creates an AWS EKS cluster and adds to [the group kubernetes clusters](https://docs.gitlab.com/ee/user/group/clusters/#overview) 
 - IAM Role with specified policy for the cluster-autoscaler service account in kube-system namespace
 - Dedicated node group for Gitlab Runner with [scaling a node group to 0](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#scaling-a-node-group-to-0) configuration
 - A collection of helmfiles to setup **Gitlab Runner**, **Cluster AutoScaler**, **CertManager**, **NGINX Ingress Contoller**
+
+Other benefits:
+- Gitlab Runner, CertManager, and other helm charts can be enabled or disabled by environment variable
 
 ## Cold start
 You should do the manual steps that are described below before to run CI pipeline.
@@ -25,12 +30,16 @@ You should do the manual steps that are described below before to run CI pipelin
 ### Prerequisites
 - [Amazon AWS account](https://aws.amazon.com/)
 - [Terraform](https://www.terraform.io/downloads.html) (v0.12.13+)
-- [direnv](https://direnv.net/) (v2.15.0+) (optional)
-- [Amazon CLI](https://aws.amazon.com/cli/) (optional)
-- [Kubernetes CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (optional)
+
+### Local development
+- [direnv](https://direnv.net/) (v2.15.0+)
+- [Amazon CLI](https://aws.amazon.com/cli/)
+- [Kubernetes CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 ### DNS requirements
-In addition to the requirements listed above, a domain name is also required for setting up Ingress endpoints to services running in the cluster. The specified domain name can be a top-level domain (TLD) or a subdomain. In either case, you have to manually set up the NS records for the specified TLD or subdomain so as to delegate DNS resolution queries to an Amazon Route 53 hosted zone. This is required in order to generate valid TLS certificates.
+In addition to the requirements listed above, a domain name is also required for setting up Ingress endpoints to services running in the cluster. 
+The specified domain name can be a top-level domain (TLD) or a subdomain. 
+In either case, you have to manually set up the NS records for the specified TLD or subdomain so as to delegate DNS resolution queries to an Amazon Route 53 hosted zone. This is required in order to generate valid TLS certificates.
 
 ### Requirements
 
@@ -43,14 +52,14 @@ In addition to the requirements listed above, a domain name is also required for
 ## Installation and setup
 ### Step 1: Setup terraform backend.
 
-1.1. Change `./fixtures.eu-central-1.tfvars` according to your requirements, 
+1.1. Change `./eu-central-1.tfvars` according to your requirements, 
 at least, change namespace and stage variables to your own.
 
 ```bash
 $ cd ./terraform/aws-eks
 $ cp remote-state.tf.example remote-state.tf
 $ terraform init
-$ terraform apply -var-file ./fixtures.eu-central-1.tfvars -target=module.terraform_state_backend
+$ terraform apply -var-file ./eu-central-1.tfvars -target=module.terraform_state_backend
 ```
 
 Output:
