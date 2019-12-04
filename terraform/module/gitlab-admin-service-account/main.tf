@@ -26,3 +26,11 @@ resource "kubernetes_cluster_role_binding" "gitlab_admin_cluster_role_binding" {
     namespace = "kube-system"
   }
 }
+
+resource "kubernetes_namespace" "tillerless" {
+  count = var.create_tillerless_ns && var.enabled ? 1 : 0
+
+  metadata {
+    name = "tillerless"
+  }
+}

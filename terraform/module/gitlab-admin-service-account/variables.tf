@@ -14,3 +14,8 @@ variable "kubernetes_token" {
 variable "kubernetes_ca_cert" {
   type = string
 }
+
+variable "create_tillerless_ns" {
+  type    = bool
+  default = false
+}

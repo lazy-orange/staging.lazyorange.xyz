@@ -1,12 +1,11 @@
 locals {
-  cluster_name = "lazyorange-staging-doks"
+  cluster_name = var.cluster_name
+  domain       = var.dns_zone
   do_kube_id   = digitalocean_kubernetes_cluster.default.id
 
   kubernetes_endpoint = digitalocean_kubernetes_cluster.default.endpoint
   kubernetes_token    = digitalocean_kubernetes_cluster.default.kube_config[0].token
   kubernetes_ca_cert  = digitalocean_kubernetes_cluster.default.kube_config[0].cluster_ca_certificate
-
-  kubernetes_ca_cert_enc = digitalocean_kubernetes_cluster.default.kube_config[0].cluster_ca_certificate
 }
 
 resource "digitalocean_kubernetes_cluster" "default" {
@@ -32,25 +31,14 @@ resource "digitalocean_kubernetes_node_pool" "main" {
   tags       = ["main"]
 }
 
-provider "kubernetes" {
-  host                   = local.kubernetes_endpoint
-  token                  = local.kubernetes_token
-  cluster_ca_certificate = local.kubernetes_ca_cert
-}
-
 module "gitlab_admin_service_account" {
-  source  = "../module/gitlab-admin-service-account"
-  enabled = var.enabled
+  source               = "../module/gitlab-admin-service-account"
+  enabled              = var.enabled
+  create_tillerless_ns = var.enabled
 
   kubernetes_endpoint = local.kubernetes_endpoint
   kubernetes_token    = local.kubernetes_token
   kubernetes_ca_cert  = local.kubernetes_ca_cert
-}
-
-resource "kubernetes_namespace" "tillerless" {
-  metadata {
-    name = "tillerless"
-  }
 }
 
 data "gitlab_group" "root" {
@@ -59,16 +47,14 @@ data "gitlab_group" "root" {
 }
 
 resource "gitlab_group_cluster" "root" {
-  count = 1
-
   group = join("", data.gitlab_group.root.*.id)
 
   name   = local.do_kube_id
-  domain = "do.staging.lazyorange.xyz"
+  domain = local.domain
 
   kubernetes_api_url = local.kubernetes_endpoint
   kubernetes_token   = local.kubernetes_token
-  kubernetes_ca_cert = local.kubernetes_ca_cert
+  kubernetes_ca_cert = base64decode(local.kubernetes_ca_cert)
 
   ## You can use only one Kubernetes cluster per a group/project when your team uses a free plan on Gitlab.com
   ## If you will set explicitly env scope you can't use Auto DevOps feature
