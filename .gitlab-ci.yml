@@ -1,6 +1,7 @@
 # This template can use to set up an AWS EKS cluster for specific project
 # (group currently is not supported) and allows to you create and manage Nginx Ingress Controller,
 # CertManager and other tools with custom values for Helm charts as you wish :)
+#
 
 variables:
   CI_IMAGE_NAME: $CI_REGISTRY_IMAGE:terraform-v${TERRAFORM_VERSION}-helmfile-${HELMFILE_VERSION}
