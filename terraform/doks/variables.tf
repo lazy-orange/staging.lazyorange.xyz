@@ -20,3 +20,21 @@ variable "dns_zone" {
 variable "root_gitlab_group" {
   type = string
 }
+
+variable "gitlab_runner_ng" {
+  type = object({
+    enabled = bool
+    ng = object({
+      min_size = number,
+      max_size = number,
+    })
+  })
+
+  default = {
+    enabled = false
+    ng = {
+      min_size = 1,
+      max_size = 2
+    }
+  }
+}

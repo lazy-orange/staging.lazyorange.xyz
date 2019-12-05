@@ -20,7 +20,7 @@ releases:
     vendor: "gitlab"
     default: "false"
   chart: "gitlab/gitlab-runner"
-  # version: "v2.1.8"
+  version: "0.10.1"
   installed: {{ env "GITLAB_RUNNER_INSTALLED" | default "false" }}
   wait: true
   values:
@@ -33,10 +33,18 @@ releases:
         ## ref: https://docs.gitlab.com/runner/executors/kubernetes.html#using-docker-dind
         ##
         privileged: true
+        # 
+        # secret: gitlab-runner
         ## Gitlab Runner will assign nodes with given labels
         ## Always use a dedicated node group for gitlab runner jobs to avoid hurting other pods in the same nodes
+        {{- if eq (env "KUBE_CLUSTER_PROVIDER" | default "eks" ) "eks" }}
         nodeSelector:
           purpose: gitlab-runner
+        {{- end }}
+        {{- if eq (env "KUBE_CLUSTER_PROVIDER" ) "doks" }}
+        nodeSelector:
+          doks.digitalocean.com/node-pool: gitlab-runner
+        {{- end }}
         builds:
           limits:
             memory: 1024Mi
@@ -46,7 +54,6 @@ releases:
             cpu: 100m
       rbac:
         create: true
-      #
       resources:
         limits:
           memory: 512Mi
@@ -54,10 +61,8 @@ releases:
         requests:
           memory: 64Mi
           cpu: 100m
-      ## Gitlab Runner should not be placed to Spot instances, use always regular nodes,
+      ## Gitlab Runner should not be placed to Spot instances, use always regular nodes, because
       ## gitlab manager is responsible to handle placement of jobs and does not require a lot of resources
-      ## nodeSelector:
-      ##  purpose: gitlab-runner-manager
       affinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
