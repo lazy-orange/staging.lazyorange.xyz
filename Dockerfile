@@ -2,6 +2,7 @@ FROM registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v0.4.0
 
 ADD scripts /scripts
 
+# ==> Install Terraform
 ARG terraform_ver=0.12.13
 ENV TERRAFORM_VERSION $terraform_ver
 
