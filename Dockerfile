@@ -23,6 +23,11 @@ RUN pip install awscli
 RUN apk --purge -v del py-pip
 RUN rm /var/cache/apk/*
 
+# ==> Install doctl
+ARG doctl_ver=1.34.0
+ENV DOCTL_VERSION $doctl_ver
+RUN ./scripts/install_doctl.sh
+
 # ==> Install jq
 ADD https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 /usr/local/bin/jq
 RUN chmod +x /usr/local/bin/jq && jq --version

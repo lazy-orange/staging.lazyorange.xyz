@@ -4,8 +4,9 @@
 #
 
 variables:
-  CI_IMAGE_NAME: $CI_REGISTRY_IMAGE:terraform-v${TERRAFORM_VERSION}-helmfile-${HELMFILE_VERSION}
+  CI_IMAGE_NAME: $CI_REGISTRY_IMAGE:terraform-v${TERRAFORM_VERSION}-helmfile-${HELMFILE_VERSION}-doctl-${DOCTL_VERSION}
   HELMFILE_VERSION: v0.89.0 # https://github.com/roboll/helmfile/releases
+  DOCTL_VERSION: 1.34.0 # https://github.com/digitalocean/doctl/releases
   TERRAFORM_VERSION: 0.12.13 # https://releases.hashicorp.com/terraform/
   #
   TERRAFORM_DIR: ./terraform/aws-eks
@@ -97,7 +98,7 @@ docker-build-master:
   before_script:
   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-  - docker build --pull -t "$CI_IMAGE_NAME" --build-arg terraform_ver=$TERRAFORM_VERSION --build-arg helmfile_ver=$HELMFILE_VERSION .
+  - docker build --pull -t "$CI_IMAGE_NAME" --build-arg terraform_ver=$TERRAFORM_VERSION --build-arg helmfile_ver=$HELMFILE_VERSION --build-arg doctl_ver=$DOCTL_VERSION .
   - docker push "$CI_IMAGE_NAME"
   only:
     refs:
@@ -113,9 +114,11 @@ docker-build-master:
 .before-script:
   before_script:
   - aws --version
+  - doctl version
+  - export KUBE_CLUSTER_NAME=${KUBE_CLUSTER_NAME:-$EKS_CLUSTER_NAME}
   - |
     if [[ $AWS_EKS_CLUSTER_ENABLED == "yes" ]]; then
-      aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+      aws eks update-kubeconfig --name $KUBE_CLUSTER_NAME
     fi
     if [[ $DOKS_CLUSTER_ENABLED == "yes" ]]; then
       doctl kubernetes cluster kubeconfig save $KUBE_CLUSTER_NAME
