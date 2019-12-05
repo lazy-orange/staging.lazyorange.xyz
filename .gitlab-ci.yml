@@ -3,15 +3,16 @@
 # CertManager and other tools with custom values for Helm charts as you wish :)
 
 variables:
-  CI_IMAGE_NAME: $CI_REGISTRY_IMAGE:terraform_v${TERRAFORM_VERSION}_helmfile_${HELMFILE_VERSION}
+  CI_IMAGE_NAME: $CI_REGISTRY_IMAGE:terraform-v${TERRAFORM_VERSION}-helmfile-${HELMFILE_VERSION}
   HELMFILE_VERSION: v0.89.0 # https://github.com/roboll/helmfile/releases
   TERRAFORM_VERSION: 0.12.13 # https://releases.hashicorp.com/terraform/
-  TERRAFORM_EKS_DIR: ./terraform/aws-eks
-  TERRAFORM_EKS_VARS: $TERRAFORM_EKS_DIR/eu-central-1.tfvars
+  #
+  TERRAFORM_DIR: ./terraform/aws-eks
+  TERRAFORM_VARS: $TERRAFORM_DIR/eu-central-1.tfvars
   KUBEHOME_DIR: $CI_PROJECT_DIR/.kube
   KUBECONFIG: $CI_PROJECT_DIR/.kube/config
-  PLAN: plan.tfplan
   # Terraform variables
+  PLAN: plan.tfplan
   TF_VAR_kubeconfig_path: $CI_PROJECT_DIR/.kube/config
   TF_VAR_root_gitlab_project: $CI_PROJECT_ID
   # Set a group id to add a kubernetes cluster to its settings
@@ -39,7 +40,7 @@ before_script:
 - mkdir -p $KUBEHOME_DIR
 - echo $KUBECONFIG
 - terraform --version
-- terraform init $TERRAFORM_EKS_DIR
+- terraform init $TERRAFORM_DIR
 
 stages:
 - docker
@@ -55,14 +56,14 @@ validate:
   - .terraform
   stage: validate
   script:
-  - terraform validate $TERRAFORM_EKS_DIR
+  - terraform validate $TERRAFORM_DIR
 
 plan:
   stage: build
   extends:
   - .terraform
   script:
-  - terraform plan -var-file=$TERRAFORM_EKS_VARS -out=$PLAN $TERRAFORM_EKS_DIR
+  - terraform plan -var-file=$TERRAFORM_VARS -out=$PLAN $TERRAFORM_DIR
   artifacts:
     name: plan
     paths:
@@ -128,6 +129,7 @@ docker-build-master:
   only:
     refs:
     - master
+    - 1-add-support-for-doks-digital-ocean-kubernetes
     variables:
     - $EKS_CLUSTER_NAME
     - $AWS_DEFAULT_REGION
@@ -142,6 +144,7 @@ docker-build-master:
   only:
     refs:
     - master
+    - 1-add-support-for-doks-digital-ocean-kubernetes
     variables:
     - $GITLAB_TOKEN
     - $AWS_DEFAULT_REGION
