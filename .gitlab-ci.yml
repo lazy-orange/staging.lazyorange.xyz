@@ -113,7 +113,13 @@ docker-build-master:
 .before-script:
   before_script:
   - aws --version
-  - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+  - |
+    if [[ $AWS_EKS_CLUSTER_ENABLED == "yes" ]]; then
+      aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+    fi
+    if [[ $DOKS_CLUSTER_ENABLED == "yes" ]]; then
+      doctl kubernetes cluster kubeconfig save $KUBE_CLUSTER_NAME
+    fi
   - kubectl version
   - helm version -c
   - helm init -c
