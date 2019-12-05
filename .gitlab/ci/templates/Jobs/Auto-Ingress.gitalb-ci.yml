@@ -16,20 +16,6 @@ variables:
   - helm tiller start-ci
   - helmfile -v
 
-.general:
-  only:
-    refs:
-    - master
-    variables:
-    - $EKS_CLUSTER_NAME
-    - $AWS_DEFAULT_REGION
-    - $AWS_ACCESS_KEY_ID
-    - $AWS_SECRET_ACCESS_KEY
-  dependencies:
-  - apply
-  tags:
-  - docker
-
 deploy_ingress:
   stage: infra
   extends:
