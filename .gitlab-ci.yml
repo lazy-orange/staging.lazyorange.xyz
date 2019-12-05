@@ -66,6 +66,7 @@ validate:
     - $AWS_SECRET_ACCESS_KEY
     # specifies the DNS suffix for the externally-visible websites and services deployed in the cluster,
     # this is required in order to generate valid TLS certificates
+    #
     - $KUBE_INGRESS_BASE_DOMAIN
     - $TERRAFORM_DISABLED != "yes"
 
