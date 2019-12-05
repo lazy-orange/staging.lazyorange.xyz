@@ -9,8 +9,8 @@ variables:
   DOCTL_VERSION: 1.34.0 # https://github.com/digitalocean/doctl/releases
   TERRAFORM_VERSION: 0.12.13 # https://releases.hashicorp.com/terraform/
   #
-  TERRAFORM_DIR: ./terraform/aws-eks
-  TERRAFORM_VARS: $TERRAFORM_DIR/eu-central-1.tfvars
+  TERRAFORM_DIR: ./terraform/doks
+  TERRAFORM_VARS: $TERRAFORM_DIR/fra1.tfvars
   KUBEHOME_DIR: $CI_PROJECT_DIR/.kube
   KUBECONFIG: $CI_PROJECT_DIR/.kube/config
   # Terraform variables
