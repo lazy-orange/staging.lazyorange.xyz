@@ -144,7 +144,8 @@ docker-build-master:
     - master
     - 1-add-support-for-doks-digital-ocean-kubernetes
     variables:
-    - $KUBE_CLUSTER_PROVIDER == "eks"
+    - $AWS_EKS_CLUSTER_ENABLED == "yes"
+    - $DOKS_CLUSTER_ENABLED == "yes"
   except:
     variables:
     - $TERRAFORM_DISABLED == "yes"
