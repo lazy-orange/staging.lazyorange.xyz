@@ -52,16 +52,14 @@ stages:
 - infra
 
 validate:
-  extends:
-  - .terraform
+  extends: .terraform
   stage: validate
   script:
   - terraform validate $TERRAFORM_DIR
 
 plan:
   stage: build
-  extends:
-  - .terraform
+  extends: .terraform
   script:
   - terraform plan -var-file=$TERRAFORM_VARS -out=$PLAN $TERRAFORM_DIR
   artifacts:
@@ -73,8 +71,7 @@ plan:
 # action.
 apply:
   stage: deploy
-  extends:
-  - .terraform
+  extends: .terraform
   environment:
     name: production
   script:
