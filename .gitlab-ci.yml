@@ -129,10 +129,8 @@ docker-build-master:
     - master
     - 1-add-support-for-doks-digital-ocean-kubernetes
     variables:
-    - $EKS_CLUSTER_NAME
-    - $AWS_DEFAULT_REGION
-    - $AWS_ACCESS_KEY_ID
-    - $AWS_SECRET_ACCESS_KEY
+    - $AWS_EKS_CLUSTER_ENABLED == "yes"
+    - $DOKS_CLUSTER_ENABLED == "yes"
   dependencies:
   - apply
   tags:
