@@ -144,14 +144,6 @@ docker-build-master:
     - master
     - 1-add-support-for-doks-digital-ocean-kubernetes
     variables:
-    - $GITLAB_TOKEN
-    - $AWS_DEFAULT_REGION
-    - $AWS_ACCESS_KEY_ID
-    - $AWS_SECRET_ACCESS_KEY
-    # specifies the DNS suffix for the externally-visible websites and services deployed in the cluster,
-    # this is required in order to generate valid TLS certificates
-    #
-    - $KUBE_INGRESS_BASE_DOMAIN
     - $KUBE_CLUSTER_PROVIDER == "eks"
   except:
     variables:
