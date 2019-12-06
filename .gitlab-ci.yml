@@ -2,7 +2,6 @@
 # (group currently is not supported) and allows to you create and manage Nginx Ingress Controller,
 # CertManager and other tools with custom values for Helm charts as you wish :)
 #
-
 variables:
   CI_IMAGE_NAME: $CI_REGISTRY_IMAGE:terraform-v${TERRAFORM_VERSION}-helmfile-${HELMFILE_VERSION}-doctl-${DOCTL_VERSION}
   HELMFILE_VERSION: v0.89.0 # https://github.com/roboll/helmfile/releases
