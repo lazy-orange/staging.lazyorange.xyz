@@ -1,7 +1,7 @@
 data "digitalocean_sizes" "default" {
   filter {
-    key    = "vcpus"
-    values = [1, 2]
+    key    = "memory"
+    values = [2048, 3072, 4096]
   }
 
   filter {
@@ -20,6 +20,7 @@ locals {
 }
 
 # References:
+# - https://github.com/terraform-providers/terraform-provider-digitalocean/
 # - https://www.terraform.io/docs/providers/do/r/kubernetes_cluster.html
 # - https://www.terraform.io/docs/providers/do/r/kubernetes_node_pool.html
 # - https://www.terraform.io/docs/providers/do/r/kubernetes_node_pool.html#argument-reference
