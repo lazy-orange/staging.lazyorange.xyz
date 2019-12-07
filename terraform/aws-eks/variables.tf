@@ -174,7 +174,7 @@ variable "root_gitlab_project" {
   description = "A project id that acts as a Gitlab Manage repo, will be used to setup a few environment variables to properly setup other CI jobs"
 }
 
-variable "root_gitlab_group_id" {
+variable "root_gitlab_group" {
   type    = string
   default = ""
 }
