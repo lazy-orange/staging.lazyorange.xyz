@@ -4,8 +4,8 @@ deploy_gitlab_runner:
   - .auto-configure
   - .before-script
   - .general
-  rules:
-    - if: '$GITLAB_RUNNER_INSTALLED != "" && $GITLAB_RUNNER_TOKEN != ""'
+  variables:
+  - $GITLAB_RUNNER_INSTALLED
   script:
   - helmfile -l component=gitlab-runner list
   - helm tiller run -- helmfile -l component=gitlab-runner sync --skip-deps
