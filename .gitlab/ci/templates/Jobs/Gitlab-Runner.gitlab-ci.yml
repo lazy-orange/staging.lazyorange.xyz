@@ -4,6 +4,8 @@ deploy_gitlab_runner:
   - .auto-configure
   - .before-script
   - .general
+  # it works in another fashion but this job requires the following variables,
+  # please ensure that they are present
   only:
     variables:
     - $GITLAB_RUNNER_INSTALLED

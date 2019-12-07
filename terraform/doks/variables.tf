@@ -17,7 +17,12 @@ variable "dns_zone" {
   description = "specifies the DNS suffix for the externally-visible websites and services deployed in the cluster"
 }
 
-variable "root_gitlab_group_id" {
+variable "root_gitlab_project" {
+  type        = string
+  description = "A project id that acts as a Gitlab Manage repo, will be used to setup a few environment variables to properly setup other CI jobs"
+}
+
+variable "root_gitlab_group" {
   type = string
 }
 

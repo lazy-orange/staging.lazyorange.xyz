@@ -6,15 +6,15 @@
 # - https://github.com/cloudposse/terraform-aws-tfstate-backend#usage
 # - https://github.com/cloudposse/terraform-aws-tfstate-backend/releases
 
-module "terraform_state_backend" {
-  source        = "git::https://github.com/cloudposse/terraform-aws-tfstate-backend.git?ref=0.9.0"
-  namespace     = "lo"
-  stage         = "dev"
-  region        = "eu-central-1"
-  name          = "terraform"
-  attributes    = ["state"]
-  force_destroy = true
-}
+// module "terraform_state_backend" {
+//   source        = "git::https://github.com/cloudposse/terraform-aws-tfstate-backend.git?ref=0.9.0"
+//   namespace     = "lo"
+//   stage         = "dev"
+//   region        = "eu-central-1"
+//   name          = "terraform"
+//   attributes    = ["state"]
+//   force_destroy = true
+// }
 
 // output "terraform_backend_config" {
 //   value = module.terraform_state_backend.terraform_backend_config
@@ -33,4 +33,3 @@ terraform {
     encrypt        = "true"
   }
 }
-
