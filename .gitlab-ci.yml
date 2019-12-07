@@ -6,7 +6,7 @@ variables:
   CI_IMAGE_NAME: $CI_REGISTRY_IMAGE:terraform-v${TERRAFORM_VERSION}-helmfile-${HELMFILE_VERSION}-doctl-${DOCTL_VERSION}
   HELMFILE_VERSION: v0.89.0 # https://github.com/roboll/helmfile/releases
   DOCTL_VERSION: 1.34.0 # https://github.com/digitalocean/doctl/releases
-  TERRAFORM_VERSION: 0.12.13 # https://releases.hashicorp.com/terraform/
+  TERRAFORM_VERSION: 0.12.17 # https://releases.hashicorp.com/terraform/
   #
   TERRAFORM_DIR: ./terraform/doks
   TERRAFORM_VARS: $TERRAFORM_DIR/fra1.tfvars
