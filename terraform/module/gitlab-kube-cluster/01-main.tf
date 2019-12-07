@@ -24,14 +24,6 @@ data "gitlab_group" "root" {
   group_id = length(var.root_gitlab_group) > 0 ? var.root_gitlab_group : 0
 }
 
-// resource "gitlab_project_variable" "eks_cluster_name" {
-//   project           = data.gitlab_project.root.id
-//   key               = "EKS_CLUSTER_NAME"
-//   value             = data.aws_eks_cluster.default.id
-//   protected         = true
-//   environment_scope = "*"
-// }
-
 resource "gitlab_project_variable" "gitlab_runner_token" {
   count = local.group_gitlab_runner_enabled
 
