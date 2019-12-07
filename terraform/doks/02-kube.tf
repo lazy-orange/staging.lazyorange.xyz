@@ -23,7 +23,7 @@ resource "digitalocean_kubernetes_cluster" "default" {
 # by default, DigitalOcean adds label `doks.digitalocean.com/node-pool` to node with name of node pool, this label can be 
 # used to setup helm chart for Gitlab Runner
 resource "digitalocean_kubernetes_node_pool" "gitlab_runner" {
-  count      = var.gitlab_runner_ng.enabled ? 1 : 0
+  count      = var.gitlab_runner_installed ? 1 : 0
   cluster_id = digitalocean_kubernetes_cluster.default.id
 
   name       = "gitlab-runner"

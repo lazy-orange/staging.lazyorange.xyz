@@ -20,6 +20,7 @@ variables:
   # ⚠️ REPLACE WITH YOUR OWN ⚠️
   TF_VAR_root_gitlab_group_id: 6638212
   TF_VAR_dns_zone: $KUBE_INGRESS_BASE_DOMAIN
+  TF_VAR_gitlab_runner_installed: $GITLAB_RUNNER_INSTALLED
   # helmfiles
   # the helm charts are enabled for testing purposes, you may want to change these values to your own
   GITLAB_RUNNER_INSTALLED: "true"

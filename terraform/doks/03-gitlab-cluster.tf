@@ -9,8 +9,8 @@ module "gitlab_admin_service_account" {
 }
 
 data "gitlab_group" "root" {
-  count    = length(var.root_gitlab_group) > 0 ? 1 : 0
-  group_id = length(var.root_gitlab_group) > 0 ? var.root_gitlab_group : 0
+  count    = length(var.root_gitlab_group_id) > 0 ? 1 : 0
+  group_id = length(var.root_gitlab_group_id) > 0 ? var.root_gitlab_group_id : 0
 }
 
 resource "gitlab_group_cluster" "root" {

@@ -17,13 +17,17 @@ variable "dns_zone" {
   description = "specifies the DNS suffix for the externally-visible websites and services deployed in the cluster"
 }
 
-variable "root_gitlab_group" {
+variable "root_gitlab_group_id" {
   type = string
+}
+
+variable "gitlab_runner_installed" {
+  type    = bool
+  default = false
 }
 
 variable "gitlab_runner_ng" {
   type = object({
-    enabled = bool
     ng = object({
       min_size = number,
       max_size = number,
@@ -31,7 +35,6 @@ variable "gitlab_runner_ng" {
   })
 
   default = {
-    enabled = false
     ng = {
       min_size = 1,
       max_size = 2
