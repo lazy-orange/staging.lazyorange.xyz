@@ -26,10 +26,9 @@ locals {
 # - https://www.terraform.io/docs/providers/do/r/kubernetes_node_pool.html#argument-reference
 #
 resource "digitalocean_kubernetes_cluster" "default" {
-  name   = local.cluster_name
-  region = var.region
-  // Grab the latest version slug from `doctl kubernetes options versions`
-  version = "1.16.2-do.0"
+  name    = local.cluster_name
+  region  = var.region
+  version = local.kubernetes_version
 
   node_pool {
     name       = "main"

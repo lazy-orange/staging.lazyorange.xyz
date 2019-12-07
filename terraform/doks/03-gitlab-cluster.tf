@@ -2,7 +2,7 @@ module "gitlab_doks_cluster" {
   source = "../module/gitlab-kube-cluster"
   stage  = "development"
 
-  enabled = var.enabled
+  enabled                     = var.enabled
   group_gitlab_runner_enabled = var.enabled
 
   cluster_name = local.cluster_name

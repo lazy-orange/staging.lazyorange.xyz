@@ -24,6 +24,8 @@ The module supports the following:
 Other benefits:
 - Gitlab Runner, CertManager, and other helm charts can be enabled or disabled by environment variable
 
+**Note:** Helm chart which is used by default in Auto DevOps pipelines does not support Kubernetes 1.16+ yet
+
 ## Cold start
 You should do the manual steps that are described below before to run CI pipeline.
 
