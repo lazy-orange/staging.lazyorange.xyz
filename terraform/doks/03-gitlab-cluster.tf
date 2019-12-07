@@ -19,7 +19,7 @@ data "gitlab_project" "root" {
   id = var.root_gitlab_project
 }
 
-resource "gitlab_project_variable" "eks_cluster_name" {
+resource "gitlab_project_variable" "cluster_name" {
   project           = data.gitlab_project.root.id
   key               = "KUBE_CLUSTER_NAME"
   value             = local.cluster_name
