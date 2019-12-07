@@ -3,6 +3,7 @@ module "gitlab_doks_cluster" {
   stage  = "development"
 
   enabled = var.enabled
+  group_gitlab_runner_enabled = var.enabled
 
   cluster_name = local.cluster_name
   dns_zone     = local.domain

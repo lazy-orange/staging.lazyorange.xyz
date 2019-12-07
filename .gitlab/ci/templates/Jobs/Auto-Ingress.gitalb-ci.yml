@@ -46,6 +46,10 @@ deploy_certmanager:
   - export CERT_MANAGER_EMAIL=${CERT_MANAGER_EMAIL:-$GITLAB_USER_EMAIL}
   - helmfile -l component=cert-manager list 
   - helm tiller run -- helmfile -l component=cert-manager sync --skip-deps
+  retry:
+    max: 2
+    when:
+    - script_failure
   only:
     variables:
     - $CERT_MANAGER_INSTALLED
