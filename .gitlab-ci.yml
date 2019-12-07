@@ -18,7 +18,7 @@ variables:
   TF_VAR_root_gitlab_project: $CI_PROJECT_ID
   # Set a group id to add a kubernetes cluster to its settings
   # ⚠️ REPLACE WITH YOUR OWN ⚠️
-  TF_VAR_root_gitlab_group_id: 6638212
+  TF_VAR_root_gitlab_group: 6638212
   TF_VAR_dns_zone: $KUBE_INGRESS_BASE_DOMAIN
   TF_VAR_gitlab_runner_installed: $GITLAB_RUNNER_INSTALLED
   # helmfiles
