@@ -1,3 +1,24 @@
+data "digitalocean_sizes" "default" {
+  filter {
+    key    = "vcpus"
+    values = [1, 2]
+  }
+
+  filter {
+    key    = "regions"
+    values = [var.region]
+  }
+
+  sort {
+    key       = "price_monthly"
+    direction = "asc"
+  }
+}
+
+locals {
+  instance_type = element(data.digitalocean_sizes.default.sizes, 0).slug
+}
+
 # References:
 # - https://www.terraform.io/docs/providers/do/r/kubernetes_cluster.html
 # - https://www.terraform.io/docs/providers/do/r/kubernetes_node_pool.html
@@ -11,7 +32,7 @@ resource "digitalocean_kubernetes_cluster" "default" {
 
   node_pool {
     name       = "main"
-    size       = "s-1vcpu-2gb"
+    size       = local.instance_type
     auto_scale = true
     node_count = 1
     min_nodes  = 1
@@ -27,7 +48,7 @@ resource "digitalocean_kubernetes_node_pool" "gitlab_runner" {
   cluster_id = digitalocean_kubernetes_cluster.default.id
 
   name       = "gitlab-runner"
-  size       = "s-1vcpu-2gb"
+  size       = local.instance_type
   node_count = var.gitlab_runner_ng.ng.min_size
   min_nodes  = var.gitlab_runner_ng.ng.min_size
   max_nodes  = var.gitlab_runner_ng.ng.max_size
