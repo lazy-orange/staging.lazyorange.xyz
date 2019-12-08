@@ -58,9 +58,14 @@ stages:
 - gitlab
 - infra
 
-validate:
+validate_doks:
   stage: validate
-  extends: .terraform
+  extends: 
+  - .terraform
+  - .doks_cluster_enabled
+  variables:
+    TERRAFORM_DIR: ./terraform/doks
+    TERRAFORM_VARS: $TERRAFORM_DIR/fra1.tfvars
   script:
   - terraform validate $TERRAFORM_DIR
 
@@ -151,14 +156,31 @@ docker-build-master:
   tags:
   - docker
 
+.aws_eks_cluster_enabled:
+  only:
+    variables:
+    - $AWS_EKS_CLUSTER_ENABLED == "yes"
+
+.doks_cluster_enabled:
+  only:
+    variables:
+    - $DOKS_CLUSTER_ENABLED == "yes"
+
 .terraform:
   only:
     refs:
     - master
     - 1-add-support-for-doks-digital-ocean-kubernetes
-    variables:
-    - $AWS_EKS_CLUSTER_ENABLED == "yes"
-    - $DOKS_CLUSTER_ENABLED == "yes"
+  before_script:
+  - mkdir -p $KUBEHOME_DIR
+  - echo $KUBECONFIG
+  - terraform --version
+  - terraform init $TERRAFORM_DIR
+  - |
+    if [[ $DOKS_CLUSTER_ENABLED == "yes" ]]; then
+      export AWS_SECRET_ACCESS_KEY=$AWS_S3_BACKEND_SECRET_ACCESS_KEY
+      export AWS_ACCESS_KEY_ID=$AWS_S3_BACKEND_ACCESS_KEY_ID
+    fi
   except:
     variables:
     - $TERRAFORM_DISABLED == "yes"
