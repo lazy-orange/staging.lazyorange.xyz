@@ -204,6 +204,14 @@ docker-build-master:
   - mkdir -p $KUBEHOME_DIR
   - echo $KUBECONFIG
   - terraform --version
+  - apt-get install -yq procps
+  - export KUBE_CLUSTER_NAME=${KUBE_CLUSTER_NAME:-$EKS_CLUSTER_NAME}
+  - |
+    if [[ $DOKS_CLUSTER_ENABLED == "yes" ]]; then
+      doctl kubernetes cluster kubeconfig save $KUBE_CLUSTER_NAME
+    elif [[ $AWS_EKS_CLUSTER_ENABLED == "yes" ]]; then
+      aws eks update-kubeconfig --name $KUBE_CLUSTER_NAME
+    fi
   - |
     if [[ $DOKS_CLUSTER_ENABLED == "yes" ]]; then
       export AWS_SECRET_ACCESS_KEY=$AWS_S3_BACKEND_SECRET_ACCESS_KEY
