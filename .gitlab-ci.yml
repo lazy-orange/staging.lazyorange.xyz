@@ -115,7 +115,6 @@ destroy with delay:
   script:
   - helm version -c
   - helm init -c
-  - helm plugin install https://github.com/rimusz/helm-tiller
   - helm tiller install
   - helm tiller start-ci
   - ./scripts/destroy_helm_releases.sh
@@ -163,7 +162,6 @@ docker-build-master:
   - kubectl version
   - helm version -c
   - helm init -c
-  - helm plugin install https://github.com/rimusz/helm-tiller
   - helm tiller install
   - helm tiller start-ci
   - helmfile -v

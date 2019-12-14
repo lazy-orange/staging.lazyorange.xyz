@@ -4,18 +4,6 @@ variables:
 .auto-configure:
   image: $CI_IMAGE_NAME
 
-.before-script:
-  before_script:
-  - aws --version
-  - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
-  - kubectl version
-  - helm version -c
-  - helm init -c
-  - helm plugin install https://github.com/rimusz/helm-tiller
-  - helm tiller install
-  - helm tiller start-ci
-  - helmfile -v
-
 deploy_ingress:
   stage: infra
   extends:
