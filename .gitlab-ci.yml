@@ -58,28 +58,16 @@ stages:
 - gitlab
 - infra
 
-validate_eks:
+validate:
   stage: validate
   extends:
-  - .terraform 
-  - .aws_eks_cluster_enabled
-  variables:
-    TERRAFORM_DIR: ./terraform/aws-eks
-    TERRAFORM_VARS: $TERRAFORM_DIR/eu-central-1.tfvars
-  script:
-  - terraform validate $TERRAFORM_DIR
-
-validate_doks:
-  stage: validate
-  extends: 
   - .terraform
-  - .doks_cluster_enabled
-  variables:
-    TERRAFORM_DIR: ./terraform/doks
-    TERRAFORM_VARS: $TERRAFORM_DIR/fra1.tfvars
   script:
   - terraform validate $TERRAFORM_DIR
 
+# !!! At the same time will be used EKS or DOKS only.
+# Please, specify TERRAFORM_VARS and TERRAFORM_DIR environment variables
+# according to your choice in the variables of top this file !!!
 plan:
   stage: build
   extends: .terraform
@@ -90,8 +78,9 @@ plan:
     paths:
       - $PLAN
 
-# Separate apply job for manual launching Terraform as it can be destructive
-# action.
+# !!! At the same time will be used EKS or DOKS only.
+# Please, specify TERRAFORM_VARS and TERRAFORM_DIR environment variables
+# according to your choice in the variables of top this file !!!
 apply:
   stage: deploy
   extends: .terraform
@@ -178,6 +167,9 @@ docker-build-master:
     - $DOKS_CLUSTER_ENABLED == "yes"
 
 .terraform:
+  extends: 
+  - .aws_eks_cluster_enabled
+  - .doks_cluster_enabled
   only:
     refs:
     - master
@@ -190,6 +182,11 @@ docker-build-master:
     if [[ $DOKS_CLUSTER_ENABLED == "yes" ]]; then
       export AWS_SECRET_ACCESS_KEY=$AWS_S3_BACKEND_SECRET_ACCESS_KEY
       export AWS_ACCESS_KEY_ID=$AWS_S3_BACKEND_ACCESS_KEY_ID
+      export TERRAFORM_DIR=./terraform/doks
+      export TERRAFORM_VARS=$TERRAFORM_DIR/fra1.tfvars
+    elif [[ $AWS_EKS_CLUSTER_ENABLED == "yes" ]]; then
+      export TERRAFORM_DIR="./terraform/aws-eks"
+      export TERRAFORM_VARS="$TERRAFORM_DIR/eu-central-1.tfvars"
     fi
   - terraform init $TERRAFORM_DIR
   except:
