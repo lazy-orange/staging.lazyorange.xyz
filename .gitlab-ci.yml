@@ -8,8 +8,6 @@ variables:
   DOCTL_VERSION: 1.34.0 # https://github.com/digitalocean/doctl/releases
   TERRAFORM_VERSION: 0.12.17 # https://releases.hashicorp.com/terraform/
   #
-  TERRAFORM_DIR: ./terraform/doks
-  TERRAFORM_VARS: $TERRAFORM_DIR/fra1.tfvars
   KUBEHOME_DIR: $CI_PROJECT_DIR/.kube
   KUBECONFIG: $CI_PROJECT_DIR/.kube/config
   # Terraform variables
@@ -127,11 +125,10 @@ docker-build-master:
   - doctl version
   - export KUBE_CLUSTER_NAME=${KUBE_CLUSTER_NAME:-$EKS_CLUSTER_NAME}
   - |
-    if [[ $AWS_EKS_CLUSTER_ENABLED == "yes" ]]; then
-      aws eks update-kubeconfig --name $KUBE_CLUSTER_NAME
-    fi
     if [[ $DOKS_CLUSTER_ENABLED == "yes" ]]; then
       doctl kubernetes cluster kubeconfig save $KUBE_CLUSTER_NAME
+    elif [[ $AWS_EKS_CLUSTER_ENABLED == "yes" ]]; then
+      aws eks update-kubeconfig --name $KUBE_CLUSTER_NAME
     fi
   - kubectl version
   - helm version -c
