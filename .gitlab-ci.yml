@@ -92,7 +92,20 @@ apply:
   when: manual
   allow_failure: false
 
-destroy:
+destroy from web:
+  extends: .destroy
+  except:
+  - schedules
+  when: manual
+
+destroy with delay:
+  extends: .destroy
+  only:
+  - schedules
+  when: delayed
+  start_in: 5 minutes
+
+.destroy:
   stage: destroy
   extends: .terraform
   environment:
@@ -100,7 +113,6 @@ destroy:
   script:
   - ./scripts/destroy_helm_releases.sh
   - terraform destroy -var-file $TERRAFORM_VARS -auto-approve $TERRAFORM_DIR
-  when: manual
 
 # Builds the docker image, includes tools that might you want to use on the next stages
 # Notice, that the $CI_IMAGE_NAME enviroment variables will be used in the next stage and 
