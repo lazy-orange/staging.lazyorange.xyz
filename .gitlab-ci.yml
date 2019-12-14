@@ -58,6 +58,17 @@ stages:
 - gitlab
 - infra
 
+validate_eks:
+  stage: validate
+  extends:
+  - .terraform 
+  - .aws_eks_cluster_enabled
+  variables:
+    TERRAFORM_DIR: ./terraform/aws-eks
+    TERRAFORM_VARS: $TERRAFORM_DIR/eu-central-1.tfvars
+  script:
+  - terraform validate $TERRAFORM_DIR
+
 validate_doks:
   stage: validate
   extends: 
