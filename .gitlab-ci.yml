@@ -3,10 +3,12 @@
 # CertManager and other tools with custom values for Helm charts as you wish :)
 #
 variables:
-  CI_IMAGE_NAME: $CI_REGISTRY_IMAGE:terraform-v${TERRAFORM_VERSION}-helmfile-${HELMFILE_VERSION}-doctl-${DOCTL_VERSION}
+  CI_IMAGE_NAME: $CI_REGISTRY_IMAGE:terraform-v${TERRAFORM_VERSION}-helmfile-${HELMFILE_VERSION}-doctl-${DOCTL_VERSION}-kubectl-${KUBECTL_VER}-helm-${HELM_VER}
+  KUBECTL_VER: v1.16.0
+  HELM_VER: v2.15.1
   HELMFILE_VERSION: v0.94.1 # https://github.com/roboll/helmfile/releases
-  DOCTL_VERSION: 1.34.0 # https://github.com/digitalocean/doctl/releases
-  TERRAFORM_VERSION: 0.12.17 # https://releases.hashicorp.com/terraform/
+  DOCTL_VERSION: 1.36.0 # https://github.com/digitalocean/doctl/releases
+  TERRAFORM_VERSION: 0.12.18 # https://releases.hashicorp.com/terraform/
   #
   KUBEHOME_DIR: $CI_PROJECT_DIR/.kube
   KUBECONFIG: $CI_PROJECT_DIR/.kube/config
@@ -134,7 +136,7 @@ docker-build-master:
   before_script:
   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-  - docker build --pull -t "$CI_IMAGE_NAME" --build-arg terraform_ver=$TERRAFORM_VERSION --build-arg helmfile_ver=$HELMFILE_VERSION --build-arg doctl_ver=$DOCTL_VERSION .
+  - docker build --pull -t "$CI_IMAGE_NAME" --build-arg terraform_ver=$TERRAFORM_VERSION --build-arg helm_ver=$HELM_VER --build-arg kubectl_ver=$KUBECTL_VER --build-arg helmfile_ver=$HELMFILE_VERSION --build-arg doctl_ver=$DOCTL_VERSION .
   - docker push "$CI_IMAGE_NAME"
   only:
     refs:
