@@ -150,6 +150,7 @@ docker-build-master:
 
 .before-script:
   before_script:
+  - apt-get install -yq procps
   - aws --version
   - doctl version
   - export KUBE_CLUSTER_NAME=${KUBE_CLUSTER_NAME:-$EKS_CLUSTER_NAME}
