@@ -12,6 +12,8 @@ RUN ./terraform-install.sh -i $TERRAFORM_VERSION
 # Check that it's installed
 RUN terraform --version 
 
+RUN helm init -c && helm plugin install https://github.com/rimusz/helm-tiller
+
 # ==> Install helmfile
 ARG helmfile_ver=v0.89.0
 ENV HELMFILE_VERSION $helmfile_ver

@@ -111,6 +111,11 @@ destroy with delay:
   environment:
     name: production
   script:
+  - helm version -c
+  - helm init -c
+  - helm plugin install https://github.com/rimusz/helm-tiller
+  - helm tiller install
+  - helm tiller start-ci
   - ./scripts/destroy_helm_releases.sh
   - terraform destroy -var-file $TERRAFORM_VARS -auto-approve $TERRAFORM_DIR
 
