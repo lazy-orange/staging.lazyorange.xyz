@@ -79,10 +79,21 @@ plan:
     paths:
       - $PLAN
 
-# !!! At the same time will be used EKS or DOKS only.
-# Please, specify TERRAFORM_VARS and TERRAFORM_DIR environment variables
-# according to your choice in the variables of top this file !!!
+apply with autoapprove:
+  extends: .apply
+  allow_failure: false
+  only:
+  - schedules
+
 apply:
+  extends: .apply
+  when: manual
+  allow_failure: false
+  except:
+  - schedules
+
+# At the same time will be created EKS or DOKS only.
+.apply:
   stage: deploy
   extends: .terraform
   environment:
@@ -91,8 +102,6 @@ apply:
   - terraform apply -input=false $PLAN
   dependencies:
   - plan
-  when: manual
-  allow_failure: false
 
 destroy from web:
   extends: .destroy
