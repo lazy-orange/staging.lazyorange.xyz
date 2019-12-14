@@ -107,19 +107,6 @@ destroy with delay:
   when: delayed
   start_in: 5 minutes
 
-.destroy:
-  stage: destroy
-  extends: .terraform
-  environment:
-    name: production
-  script:
-  - helm version -c
-  - helm init -c
-  - helm tiller install
-  - helm tiller start-ci
-  - ./scripts/destroy_helm_releases.sh
-  - terraform destroy -var-file $TERRAFORM_VARS -auto-approve $TERRAFORM_DIR
-
 # Builds the docker image, includes tools that might you want to use on the next stages
 # Notice, that the $CI_IMAGE_NAME enviroment variables will be used in the next stage and 
 # based on the some env variables
@@ -137,6 +124,8 @@ docker-build-master:
   script:
   - docker build --pull -t "$CI_IMAGE_NAME" --build-arg terraform_ver=$TERRAFORM_VERSION --build-arg helm_ver=$HELM_VER --build-arg kubectl_ver=$KUBECTL_VER --build-arg helmfile_ver=$HELMFILE_VERSION --build-arg doctl_ver=$DOCTL_VERSION .
   - docker push "$CI_IMAGE_NAME"
+  except:
+  - schedules
   only:
     refs:
     - master
@@ -147,6 +136,19 @@ docker-build-master:
 
 .auto-configure:
   image: $CI_IMAGE_NAME
+
+.destroy:
+  stage: destroy
+  extends: .terraform
+  environment:
+    name: production
+  script:
+  - helm version -c
+  - helm init -c
+  - helm tiller install
+  - helm tiller start-ci
+  - ./scripts/destroy_helm_releases.sh
+  - terraform destroy -var-file $TERRAFORM_VARS -auto-approve $TERRAFORM_DIR
 
 .before-script:
   before_script:
