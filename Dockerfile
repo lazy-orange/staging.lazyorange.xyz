@@ -1,5 +1,5 @@
 FROM bitnami/minideb:stretch
-RUN apt-get update && apt-get install -qy wget unzip curl git
+RUN apt-get update && apt-get install -qy wget unzip q git
 
 ADD scripts /scripts
 
@@ -45,4 +45,4 @@ RUN chmod +x /usr/local/bin/jq && jq --version
 
 ADD helmfile.d /etc/helmfile.d
 
-RUN apt-get remove -qy wget unzip curl git python-pip && apt-get clean
+RUN apt-get remove -qy wget unzip git python-pip && apt-get clean
