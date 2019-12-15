@@ -2,10 +2,9 @@ version: "3.6"
 
 services:
   ops:
-    # image: registry.gitlab.com/vymarkov/ops
-    image: registry.gitlab.com/vymarkov/ops:terraform_v0.12.13_helmfile_v0.89.0
+    image: ops:terraform-v0.12.13_helmfile-v0.89.0
     env_file:
     - .env
     volumes:
     - .:/src
-    # build: .
+    build: .

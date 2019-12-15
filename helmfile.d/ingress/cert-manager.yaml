@@ -30,7 +30,7 @@ releases:
     vendor: "jetstack"
     default: "false"
   chart: "jetstack/cert-manager"
-  version: "v0.9.0"
+  version: "v0.11.1"
   wait: true
   installed: {{ env "CERT_MANAGER_INSTALLED" | default "false" }}
   hooks:
@@ -38,7 +38,7 @@ releases:
     - events: ["presync"]
       showlogs: true
       command: "/bin/sh"
-      args: ["-c", "kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.9/deploy/manifests/00-crds.yaml"]
+      args: ["-c", "kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"]
     # This hook adds the annotation that keeps the webhook from preventing its own installation
     - events: ["presync"]
       showlogs: true
@@ -47,7 +47,7 @@ releases:
       - "-c"
       - >-
         kubectl get namespace "{{`{{ .Release.Namespace }}`}}" >/dev/null 2>&1 || kubectl create namespace "{{`{{ .Release.Namespace }}`}}";
-        kubectl label --overwrite namespace "{{`{{ .Release.Namespace }}`}}" "certmanager.k8s.io/disable-validation=true" ;
+        # kubectl label --overwrite namespace "{{`{{ .Release.Namespace }}`}}" "certmanager.k8s.io/disable-validation=true" ;
         [[ "{{`{{ .Release.Namespace }}`}}" = "cert-manager" ]] && [[ -n "${CERT_MANAGER_IAM_ROLE}" ]]
         && kubectl annotate namespace "{{`{{ .Release.Namespace }}`}}" "iam.amazonaws.com/permitted=${CERT_MANAGER_IAM_ROLE}"
         || echo + Not annotating namespace "{{`{{ .Release.Namespace }}`}}" with "iam.amazonaws.com/permitted=${CERT_MANAGER_IAM_ROLE}"
@@ -100,6 +100,7 @@ releases:
         requests:
           cpu: "50m"
           memory: "128Mi"
+
 - name: 'cert-manager-issuers'
   chart: "kubernetes-incubator/raw"
   namespace: "cert-manager"
@@ -110,11 +111,14 @@ releases:
   version: "0.1.0"
   wait: true
   force: true
+  atomic: true
   recreatePods: true
-  installed: {{ env "CERT_MANAGER_INSTALLED" | default "true" }}
+  installed: {{ env "CERT_MANAGER_INSTALLED" | default "false" }}
+  needs:
+  - "cert-manager/cert-manager"
   values:
   - resources:
-    - apiVersion: certmanager.k8s.io/v1alpha1
+    - apiVersion: cert-manager.io/v1alpha2
       kind: ClusterIssuer
       metadata:
         name: letsencrypt-staging
@@ -129,15 +133,15 @@ releases:
             name: letsencrypt-staging
           solvers:
             # Enable the HTTP-01 challenge provider
-            - http01: {}
-                # ingress:
-                  # class: nginx
+            - http01:
+                ingress:
+                  class: nginx
 {{- if env "CERT_MANAGER_IAM_ROLE" | default "" }}
             # Enable the DNS-01 challenge provider
             - dns01:
                 route53: {}
 {{- end }}
-    - apiVersion: certmanager.k8s.io/v1alpha1
+    - apiVersion: cert-manager.io/v1alpha2
       kind: ClusterIssuer
       metadata:
         name: letsencrypt-prod

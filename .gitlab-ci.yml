@@ -1,25 +1,33 @@
 # This template can use to set up an AWS EKS cluster for specific project
 # (group currently is not supported) and allows to you create and manage Nginx Ingress Controller,
 # CertManager and other tools with custom values for Helm charts as you wish :)
-
+#
 variables:
-  CI_IMAGE_NAME: $CI_REGISTRY_IMAGE:terraform_v${TERRAFORM_VERSION}_helmfile_${HELMFILE_VERSION}
-  HELMFILE_VERSION: v0.89.0 # https://github.com/roboll/helmfile/releases
-  TERRAFORM_VERSION: 0.12.13 # https://releases.hashicorp.com/terraform/
-  TERRAFORM_EKS_DIR: ./terraform/aws-eks
-  TERRAFORM_EKS_VARS: $TERRAFORM_EKS_DIR/eu-central-1.tfvars
+  CI_IMAGE_NAME: $CI_REGISTRY_IMAGE:terraform-v${TERRAFORM_VERSION}-helmfile-${HELMFILE_VERSION}-doctl-${DOCTL_VERSION}-kubectl-${KUBECTL_VER}-helm-${HELM_VER}
+  KUBECTL_VER: v1.16.0
+  HELM_VER: v2.15.1
+  HELMFILE_VERSION: v0.94.1 # https://github.com/roboll/helmfile/releases
+  DOCTL_VERSION: 1.36.0 # https://github.com/digitalocean/doctl/releases
+  TERRAFORM_VERSION: 0.12.18 # https://releases.hashicorp.com/terraform/
+  #
   KUBEHOME_DIR: $CI_PROJECT_DIR/.kube
   KUBECONFIG: $CI_PROJECT_DIR/.kube/config
-  PLAN: plan.tfplan
   # Terraform variables
+  PLAN: plan.tfplan
   TF_VAR_kubeconfig_path: $CI_PROJECT_DIR/.kube/config
   TF_VAR_root_gitlab_project: $CI_PROJECT_ID
   # Set a group id to add a kubernetes cluster to its settings
   # ⚠️ REPLACE WITH YOUR OWN ⚠️
-  TF_VAR_root_gitlab_group_id: 6638212
+  TF_VAR_root_gitlab_group: 6638212
   TF_VAR_dns_zone: $KUBE_INGRESS_BASE_DOMAIN
+  TF_VAR_gitlab_runner_installed: $GITLAB_RUNNER_INSTALLED
   # helmfiles
+  # the helm charts are enabled for testing purposes, you may want to change these values to your own
   GITLAB_RUNNER_INSTALLED: "true"
+  NGINX_INGRESS_INSTALLED: "true"
+  CERT_MANAGER_INSTALLED: "true"
+  # autoscaling is already configured by DOKS, you may want to install to AWS EKS
+  # CLUSTER_AUTOSCALER_INSTALLED: "false"
   # helmfile environment variables
   CREATE_NAMESPACE_IF_MISSING: "true" # indicate whether the namespace should be created if it does not exist
   HELM_HOST: localhost:44134
@@ -39,7 +47,7 @@ before_script:
 - mkdir -p $KUBEHOME_DIR
 - echo $KUBECONFIG
 - terraform --version
-- terraform init $TERRAFORM_EKS_DIR
+- terraform init $TERRAFORM_DIR
 
 stages:
 - docker
@@ -49,39 +57,64 @@ stages:
 - deploy
 - gitlab
 - infra
+- destroy
 
 validate:
+  stage: validate
   extends:
   - .terraform
-  stage: validate
   script:
-  - terraform validate $TERRAFORM_EKS_DIR
+  - terraform validate $TERRAFORM_DIR
 
+# !!! At the same time will be used EKS or DOKS only.
+# Please, specify TERRAFORM_VARS and TERRAFORM_DIR environment variables
+# according to your choice in the variables of top this file !!!
 plan:
   stage: build
-  extends:
-  - .terraform
+  extends: .terraform
   script:
-  - terraform plan -var-file=$TERRAFORM_EKS_VARS -out=$PLAN $TERRAFORM_EKS_DIR
+  - terraform plan -var-file=$TERRAFORM_VARS -out=$PLAN $TERRAFORM_DIR
   artifacts:
     name: plan
     paths:
       - $PLAN
 
-# Separate apply job for manual launching Terraform as it can be destructive
-# action.
+apply with autoapprove:
+  extends: .apply
+  allow_failure: false
+  only:
+  - schedules
+
 apply:
+  extends: .apply
+  when: manual
+  allow_failure: false
+  except:
+  - schedules
+
+# At the same time will be created EKS or DOKS only.
+.apply:
   stage: deploy
-  extends:
-  - .terraform
+  extends: .terraform
   environment:
     name: production
   script:
   - terraform apply -input=false $PLAN
   dependencies:
   - plan
+
+destroy from web:
+  extends: .destroy
+  except:
+  - schedules
   when: manual
-  allow_failure: false
+
+destroy with delay:
+  extends: .destroy
+  only:
+  - schedules
+  when: delayed
+  start_in: 5 minutes
 
 # Builds the docker image, includes tools that might you want to use on the next stages
 # Notice, that the $CI_IMAGE_NAME enviroment variables will be used in the next stage and 
@@ -98,11 +131,14 @@ docker-build-master:
   before_script:
   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-  - docker build --pull -t "$CI_IMAGE_NAME" --build-arg terraform_ver=$TERRAFORM_VERSION --build-arg helmfile_ver=$HELMFILE_VERSION .
+  - docker build --pull -t "$CI_IMAGE_NAME" --build-arg terraform_ver=$TERRAFORM_VERSION --build-arg helm_ver=$HELM_VER --build-arg kubectl_ver=$KUBECTL_VER --build-arg helmfile_ver=$HELMFILE_VERSION --build-arg doctl_ver=$DOCTL_VERSION .
   - docker push "$CI_IMAGE_NAME"
+  except:
+  - schedules
   only:
     refs:
     - master
+    - 1-add-support-for-doks-digital-ocean-kubernetes
     changes:
     - Dockerfile
     - helmfile.d/*
@@ -110,14 +146,41 @@ docker-build-master:
 .auto-configure:
   image: $CI_IMAGE_NAME
 
+.destroy:
+  stage: destroy
+  extends: .terraform
+  environment:
+    name: production
+  script:
+  - export KUBE_CLUSTER_NAME=${KUBE_CLUSTER_NAME:-$EKS_CLUSTER_NAME}
+  - |
+    if [[ $DOKS_CLUSTER_ENABLED == "yes" ]]; then
+      doctl kubernetes cluster kubeconfig save $KUBE_CLUSTER_NAME
+    elif [[ $AWS_EKS_CLUSTER_ENABLED == "yes" ]]; then
+      aws eks update-kubeconfig --name $KUBE_CLUSTER_NAME
+    fi
+  - helm version -c
+  - helm init -c
+  - helm tiller install
+  - helm tiller start-ci
+  - ./scripts/destroy_helm_releases.sh
+  - terraform destroy -var-file $TERRAFORM_VARS -auto-approve $TERRAFORM_DIR
+
 .before-script:
   before_script:
+  - apt-get install -yq procps
   - aws --version
-  - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+  - doctl version
+  - export KUBE_CLUSTER_NAME=${KUBE_CLUSTER_NAME:-$EKS_CLUSTER_NAME}
+  - |
+    if [[ $DOKS_CLUSTER_ENABLED == "yes" ]]; then
+      doctl kubernetes cluster kubeconfig save $KUBE_CLUSTER_NAME
+    elif [[ $AWS_EKS_CLUSTER_ENABLED == "yes" ]]; then
+      aws eks update-kubeconfig --name $KUBE_CLUSTER_NAME
+    fi
   - kubectl version
   - helm version -c
   - helm init -c
-  - helm plugin install https://github.com/rimusz/helm-tiller
   - helm tiller install
   - helm tiller start-ci
   - helmfile -v
@@ -128,13 +191,12 @@ docker-build-master:
   only:
     refs:
     - master
+    - 1-add-support-for-doks-digital-ocean-kubernetes
     variables:
-    - $EKS_CLUSTER_NAME
-    - $AWS_DEFAULT_REGION
-    - $AWS_ACCESS_KEY_ID
-    - $AWS_SECRET_ACCESS_KEY
-  dependencies:
-  - apply
+    - $AWS_EKS_CLUSTER_ENABLED == "yes"
+    - $DOKS_CLUSTER_ENABLED == "yes"
+  # dependencies:
+  # - apply
   tags:
   - docker
 
@@ -142,14 +204,26 @@ docker-build-master:
   only:
     refs:
     - master
+    - 1-add-support-for-doks-digital-ocean-kubernetes
     variables:
-    - $GITLAB_TOKEN
-    - $AWS_DEFAULT_REGION
-    - $AWS_ACCESS_KEY_ID
-    - $AWS_SECRET_ACCESS_KEY
-    # specifies the DNS suffix for the externally-visible websites and services deployed in the cluster,
-    # this is required in order to generate valid TLS certificates
-    - $KUBE_INGRESS_BASE_DOMAIN 
+    - $DOKS_CLUSTER_ENABLED == "yes"
+    - $AWS_EKS_CLUSTER_ENABLED == "yes"
+  before_script:
+  - mkdir -p $KUBEHOME_DIR
+  - echo $KUBECONFIG
+  - terraform --version
+  - apt-get install -yq procps
+  - |
+    if [[ $DOKS_CLUSTER_ENABLED == "yes" ]]; then
+      export AWS_SECRET_ACCESS_KEY=$AWS_S3_BACKEND_SECRET_ACCESS_KEY
+      export AWS_ACCESS_KEY_ID=$AWS_S3_BACKEND_ACCESS_KEY_ID
+      export TERRAFORM_DIR=./terraform/doks
+      export TERRAFORM_VARS=$TERRAFORM_DIR/fra1.tfvars
+    elif [[ $AWS_EKS_CLUSTER_ENABLED == "yes" ]]; then
+      export TERRAFORM_DIR="./terraform/aws-eks"
+      export TERRAFORM_VARS="$TERRAFORM_DIR/eu-central-1.tfvars"
+    fi
+  - terraform init $TERRAFORM_DIR
   except:
     variables:
     - $TERRAFORM_DISABLED == "yes"

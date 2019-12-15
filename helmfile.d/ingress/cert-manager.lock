@@ -1,9 +1,9 @@
 dependencies:
 - name: cert-manager
   repository: https://charts.jetstack.io
-  version: v0.9.0
+  version: v0.11.1
 - name: raw
   repository: https://kubernetes-charts-incubator.storage.googleapis.com
   version: 0.1.0
-digest: sha256:9f0066fa26cbfa8707cc98d7f03ad6d504af51f606d30403abb05b4e678ea78b
-generated: "2019-11-05T19:14:18.275054191Z"
+digest: sha256:f031ca9cabd8aba23c81c9e7e764eef3e82fe2acefd872050b835cba2ba5a272
+generated: "2019-12-14T18:00:17.966535633Z"
