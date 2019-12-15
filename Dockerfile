@@ -28,8 +28,10 @@ ARG helmfile_ver=v0.94.1
 ENV HELMFILE_VERSION $helmfile_ver
 RUN /scripts/install_helmfile.sh
 
-# ==> Install AWS cli
-RUN apt-get install groff less python python-pip -qy
+# ==> Install AWS cli 
+# It increases image size from 393MB to 778MB
+# and as a result increases the bootstrap process of Gitlab CI job
+RUN apt-get install python python-pip -qy
 RUN pip install awscli
 
 # ==> Install doctl
@@ -43,4 +45,4 @@ RUN chmod +x /usr/local/bin/jq && jq --version
 
 ADD helmfile.d /etc/helmfile.d
 
-RUN apt-get clean
+RUN apt-get remove -qy wget unzip curl git python-pip && apt-get clean
