@@ -1,10 +1,10 @@
 module "gitlab_eks_cluster" {
-  source  = "../module/gitlab-k8s-cluster"
+  source  = "../module/gitlab-eks-cluster"
   enabled = true
 
   stage               = var.stage
   root_gitlab_project = var.root_gitlab_project
-  root_gitlab_group   = var.root_gitlab_group_id
+  root_gitlab_group   = var.root_gitlab_group
 
   region           = var.region
   eks_cluster_name = module.eks_cluster.eks_cluster_id
