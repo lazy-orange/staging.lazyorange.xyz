@@ -195,29 +195,19 @@ docker-build-master:
     variables:
     - $AWS_EKS_CLUSTER_ENABLED == "yes"
     - $DOKS_CLUSTER_ENABLED == "yes"
-  dependencies:
-  - apply
+  # dependencies:
+  # - apply
   tags:
   - docker
 
-.aws_eks_cluster_enabled:
-  only:
-    variables:
-    - $AWS_EKS_CLUSTER_ENABLED == "yes"
-
-.doks_cluster_enabled:
-  only:
-    variables:
-    - $DOKS_CLUSTER_ENABLED == "yes"
-
 .terraform:
-  extends: 
-  - .aws_eks_cluster_enabled
-  - .doks_cluster_enabled
   only:
     refs:
     - master
     - 1-add-support-for-doks-digital-ocean-kubernetes
+    variables:
+    - $DOKS_CLUSTER_ENABLED == "yes"
+    - $AWS_EKS_CLUSTER_ENABLED == "yes"
   before_script:
   - mkdir -p $KUBEHOME_DIR
   - echo $KUBECONFIG
