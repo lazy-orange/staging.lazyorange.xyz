@@ -5,6 +5,14 @@
 # - https://github.com/cloudposse/terraform-aws-tfstate-backend
 # - https://github.com/cloudposse/terraform-aws-tfstate-backend#usage
 # - https://github.com/cloudposse/terraform-aws-tfstate-backend/releases
+# ```bash
+# $ cd ./terraform/doks
+# $ cp remote-state.tf.example remote-state.tf
+# $ terraform init
+# $ terraform apply -var-file fra1.tfvars -target=module.terraform_state_backend
+# $ terraform output terraform_backend_config >> remote-state.tf
+# $ terraform init
+#```
 
 // module "terraform_state_backend" {
 //   source        = "git::https://github.com/cloudposse/terraform-aws-tfstate-backend.git?ref=0.9.0"
@@ -12,7 +20,7 @@
 //   stage         = "dev"
 //   region        = "eu-central-1"
 //   name          = "terraform"
-//   attributes    = ["state", "digitalocean", "do"]
+//   attributes    = ["state", "do", "gitlab"]
 //   force_destroy = true
 // }
 
@@ -25,9 +33,9 @@ terraform {
 
   backend "s3" {
     region         = "eu-central-1"
-    bucket         = "lo-dev-terraform-state-digitalocean-do"
+    bucket         = "lo-dev-terraform-state-do-gitlab"
     key            = "terraform.tfstate"
-    dynamodb_table = "lo-dev-terraform-state-digitalocean-do-lock"
+    dynamodb_table = "lo-dev-terraform-state-do-gitlab-lock"
     profile        = ""
     role_arn       = ""
     encrypt        = "true"
