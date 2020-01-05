@@ -2,7 +2,7 @@
 
 # https://www.terraform.io/downloads.html
 
-export TERRAFORM_VERSION=0.12.13
+export TERRAFORM_VERSION=${TERRAFORM_VERSION:-0.12.13}
 export WORKDIR=/tmp/terraform
 
 rm -rf $WORKDIR && mkdir -p $WORKDIR && cd $WORKDIR

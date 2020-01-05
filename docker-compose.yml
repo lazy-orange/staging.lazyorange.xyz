@@ -2,7 +2,7 @@ version: "3.6"
 
 services:
   ops:
-    image: ops
+    image: ops:terraform-v0.12.13_helmfile-v0.89.0
     env_file:
     - .env
     working_dir: /project

@@ -4,32 +4,6 @@ variables:
 .auto-configure:
   image: $CI_IMAGE_NAME
 
-.before-script:
-  before_script:
-  - aws --version
-  - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
-  - kubectl version
-  - helm version -c
-  - helm init -c
-  - helm plugin install https://github.com/rimusz/helm-tiller
-  - helm tiller install
-  - helm tiller start-ci
-  - helmfile -v
-
-.general:
-  only:
-    refs:
-    - master
-    variables:
-    - $EKS_CLUSTER_NAME
-    - $AWS_DEFAULT_REGION
-    - $AWS_ACCESS_KEY_ID
-    - $AWS_SECRET_ACCESS_KEY
-  dependencies:
-  - apply
-  tags:
-  - docker
-
 deploy_ingress:
   stage: infra
   extends:
@@ -60,6 +34,10 @@ deploy_certmanager:
   - export CERT_MANAGER_EMAIL=${CERT_MANAGER_EMAIL:-$GITLAB_USER_EMAIL}
   - helmfile -l component=cert-manager list 
   - helm tiller run -- helmfile -l component=cert-manager sync --skip-deps
+  retry:
+    max: 2
+    when:
+    - script_failure
   only:
     variables:
     - $CERT_MANAGER_INSTALLED
