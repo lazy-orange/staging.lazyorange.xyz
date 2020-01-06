@@ -43,6 +43,7 @@ RUN ./scripts/install_doctl.sh
 ADD https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 /usr/local/bin/jq
 RUN chmod +x /usr/local/bin/jq && jq --version
 
-ADD helmfile.d /etc/helmfile.d
+# ==> Install zsh (not required by Gitlab Pipelines)
+RUN apt-get install zsh -yq && sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-RUN apt-get remove -qy wget unzip git python-pip && apt-get clean
+RUN apt-get remove -qy wget git unzip python-pip && apt-get clean

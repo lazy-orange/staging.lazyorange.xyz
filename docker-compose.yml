@@ -5,6 +5,8 @@ services:
     image: ops:terraform-v0.12.13_helmfile-v0.89.0
     env_file:
     - .env
+    working_dir: /project
     volumes:
-    - .:/src
+    - .:/project
     build: .
+    command: /bin/sh -c "while sleep 1000; do :; done"  
