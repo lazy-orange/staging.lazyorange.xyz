@@ -4,11 +4,28 @@
 	"name": "Kitchen",
 	"dockerFile": "../Dockerfile",
 	"context": "..",
+	"runArgs": ["--env-file", ".env"],
 
 	// Use 'settings' to set *default* container specific settings.json values on container create. 
 	// You can edit these settings after create using File > Preferences > Settings > Remote.
 	"settings": { 
-		"terminal.integrated.shell.linux": "/bin/bash"
+		"terminal.integrated.shell.linux": "/bin/zsh",
+		"vs-kubernetes": {
+			"vs-kubernetes.namespace": "default",
+			"vs-kubernetes.kubectl-path": "/usr/local/bin/kubectl",
+			"vs-kubernetes.helm-path": "/usr/local/bin/helm",
+			"vs-kubernetes.kubectlVersioning": "user-provided",
+			"vs-kubernetes.outputFormat": "yaml",
+			"vs-kubernetes.kubeconfig": "",
+			"vs-kubernetes.knownKubeconfigs": [],
+			"vs-kubernetes.autoCleanupOnDebugTerminate": false,
+			"vs-kubernetes.nodejs-autodetect-remote-root": true,
+			"vs-kubernetes.nodejs-remote-root": "",
+			"vs-kubernetes.nodejs-debug-port": 9229,
+			"checkForMinikubeUpgrade": true,
+			"logsDisplay": "webview",
+			"imageBuildTool": "Docker"
+		}
 	},
 
 	// Use 'appPort' to create a container with published ports. If the port isn't working, be sure
