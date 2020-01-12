@@ -1,1 +1,8 @@
-node_modules
+.git
+.gitignore
+.editorconfig
+**/.terraform
+*.tfstate
+*.tfstate.*
+.idea
+*.iml

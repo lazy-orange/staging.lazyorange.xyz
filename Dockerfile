@@ -43,7 +43,12 @@ RUN ./scripts/install_doctl.sh
 ADD https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 /usr/local/bin/jq
 RUN chmod +x /usr/local/bin/jq && jq --version
 
-# ==> Install zsh (not required by Gitlab Pipelines)
-RUN apt-get install zsh -yq && sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+# ==> Install zsh, direnv (not required by Gitlab Pipelines)
+# move to separate dockerfile
+RUN apt-get install direnv zsh -yq && sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"  \
+    && echo 'eval "$(direnv hook zsh)"' >> $HOME/.zshrc \
+    && curl -sL https://howtowhale.github.io/dvm/downloads/latest/install.sh | sh \
+    && echo 'source /root/.dvm/dvm.sh && dvm detect' >> $HOME/.zshrc \
+    && echo '[[ -r $DVM_DIR/bash_completion ]] && . $DVM_DIR/bash_completion' >> $HOME/.zshrc
 
-RUN apt-get remove -qy wget git unzip python-pip && apt-get clean
+RUN apt-get remove -qy wget unzip python-pip && apt-get clean
