@@ -28,6 +28,10 @@
 //   value = module.terraform_state_backend.terraform_backend_config
 // }
 
+locals {
+  access_key = ""
+}
+
 terraform {
   required_version = ">= 0.12.2"
 

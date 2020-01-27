@@ -1,15 +1,27 @@
-module "gitlab_eks_cluster" {
-  source  = "../module/gitlab-eks-cluster"
-  enabled = true
+data "aws_eks_cluster" "default" {
+  name = module.eks_cluster.eks_cluster_id
+}
 
-  stage               = var.stage
+data "aws_eks_cluster_auth" "default" {
+  name = module.eks_cluster.eks_cluster_id
+}
+
+module "gitlab_eks_cluster" {
+  source = "../module/gitlab-kube-cluster"
+  stage  = "development"
+
+  enabled                     = var.enabled
+  group_gitlab_runner_enabled = var.enabled
+
+  cluster_name = module.eks_cluster.eks_cluster_id
+  dns_zone     = var.dns_zone
+
   root_gitlab_project = var.root_gitlab_project
   root_gitlab_group   = var.root_gitlab_group
 
-  region           = var.region
-  eks_cluster_name = module.eks_cluster.eks_cluster_id
-
-  kube_ingress_base_domain = var.dns_zone
+  kubernetes_endpoint = data.aws_eks_cluster.default.endpoint
+  kubernetes_token    = data.aws_eks_cluster_auth.default.token
+  kubernetes_ca_cert  = "${base64decode(data.aws_eks_cluster.default.certificate_authority.0.data)}"
 }
 
 locals {
