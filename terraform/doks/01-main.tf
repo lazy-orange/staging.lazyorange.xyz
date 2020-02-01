@@ -3,7 +3,7 @@ locals {
   domain       = var.dns_zone
   # helm chart which is used by default in Auto DevOps pipelines does not support Kubernetes 1.16+ yet
   # Grab the latest version slug from `doctl kubernetes options versions`
-  kubernetes_version = "1.15.5-do.2"
+  kubernetes_version = "1.15.5-do.3"
 
   kubernetes_endpoint = digitalocean_kubernetes_cluster.default.endpoint
   kubernetes_token    = digitalocean_kubernetes_cluster.default.kube_config[0].token
