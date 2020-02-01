@@ -20,7 +20,7 @@
 //   stage         = "dev"
 //   region        = "eu-central-1"
 //   name          = "terraform"
-//   attributes    = ["state", "do", "gitlab"]
+//   attributes    = ["state", "digital-ocean", "gitlab"]
 //   force_destroy = true
 // }
 
@@ -33,9 +33,9 @@ terraform {
 
   backend "s3" {
     region         = "eu-central-1"
-    bucket         = "lo-dev-terraform-state-do-gitlab"
+    bucket         = "lo-dev-terraform-state-digital-ocean-gitlab"
     key            = "terraform.tfstate"
-    dynamodb_table = "lo-dev-terraform-state-do-gitlab-lock"
+    dynamodb_table = "lo-dev-terraform-state-digital-ocean-gitlab-lock"
     profile        = ""
     role_arn       = ""
     encrypt        = "true"
