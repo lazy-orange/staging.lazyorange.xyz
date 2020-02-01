@@ -21,7 +21,7 @@ module "gitlab_eks_cluster" {
 
   kubernetes_endpoint = data.aws_eks_cluster.default.endpoint
   kubernetes_token    = data.aws_eks_cluster_auth.default.token
-  kubernetes_ca_cert  = "${base64decode(data.aws_eks_cluster.default.certificate_authority.0.data)}"
+  kubernetes_ca_cert  = data.aws_eks_cluster.default.certificate_authority.0.data
 }
 
 locals {
