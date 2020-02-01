@@ -3,6 +3,16 @@ variable "region" {
   description = "AWS Region"
 }
 
+variable "enabled" {
+  type    = bool
+  default = true
+}
+
+variable "remote_state_s3_access_key" {
+  type        = string
+  default     = ""
+}
+
 variable "availability_zones" {
   type        = list(string)
   description = "List of availability zones"
