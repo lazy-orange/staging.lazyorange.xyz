@@ -21,28 +21,23 @@
 //   stage      = var.stage
 //   region     = var.region
 //   name       = "terraform"
-//   attributes = ["state", "gitlab"]
+//   attributes = ["state", "aws", "gitlab"]
 // }
 
 // output "terraform_backend_config" {
 //   value = module.terraform_state_backend.terraform_backend_config
 // }
 
-locals {
-  access_key = ""
-}
-
 terraform {
   required_version = ">= 0.12.2"
 
   backend "s3" {
     region         = "eu-central-1"
-    bucket         = "lazyorange-staging-terraform-state-gitlab"
+    bucket         = "lazyorange-staging-terraform-state-aws-gitlab"
     key            = "terraform.tfstate"
-    dynamodb_table = "lazyorange-staging-terraform-state-gitlab-lock"
+    dynamodb_table = "lazyorange-staging-terraform-state-aws-gitlab-lock"
     profile        = ""
     role_arn       = ""
     encrypt        = "true"
   }
 }
-

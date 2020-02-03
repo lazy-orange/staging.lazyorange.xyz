@@ -14,8 +14,12 @@ releases:
     vendor: "rancher"
     default: "false"
   chart: "rancher-stable/rancher"
-  version: "v2.1.8"
+  version: "v2.3.5"
   wait: true
+  atomic: true
+  # needs:
+  # - "ingress/ingress"
+  # - "cert-manager/cert-manager"
   values:
     - hostname: rancher.infra.lazyorange.xyz
       ingress:

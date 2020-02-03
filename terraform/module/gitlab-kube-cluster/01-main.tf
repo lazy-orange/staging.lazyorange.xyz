@@ -36,6 +36,8 @@ resource "gitlab_project_variable" "gitlab_runner_token" {
 
 # https://www.terraform.io/docs/providers/gitlab/r/project_cluster.html
 data "kubernetes_secret" "gitlab_admin_token" {
+  count = 0
+
   metadata {
     name      = module.gitlab_admin_service_account.sa_name
     namespace = "kube-system"
@@ -52,7 +54,7 @@ resource "gitlab_project_cluster" "root" {
   domain = local.domain
 
   kubernetes_api_url = local.kubernetes_endpoint
-  kubernetes_token   = data.kubernetes_secret.gitlab_admin_token.data.token
+  kubernetes_token   = data.kubernetes_secret.gitlab_admin_token.*.data.token
   kubernetes_ca_cert = base64decode(local.kubernetes_ca_cert)
 
   environment_scope = local.environment_scope
@@ -67,7 +69,7 @@ resource "gitlab_group_cluster" "root" {
   domain = local.domain
 
   kubernetes_api_url = local.kubernetes_endpoint
-  kubernetes_token   = data.kubernetes_secret.gitlab_admin_token.data.token
+  kubernetes_token   = data.kubernetes_secret.gitlab_admin_token.*.data.token
   kubernetes_ca_cert = base64decode(local.kubernetes_ca_cert)
 
   ## You can use only one Kubernetes cluster per a group/project when your team uses a free plan on Gitlab.com
