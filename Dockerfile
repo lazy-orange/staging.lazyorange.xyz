@@ -1,5 +1,5 @@
 FROM bitnami/minideb:stretch
-RUN apt-get update && apt-get install -qy wget unzip curl git
+RUN apt-get update && apt-get install -qy wget unzip curl git procps
 
 ADD scripts /scripts
 

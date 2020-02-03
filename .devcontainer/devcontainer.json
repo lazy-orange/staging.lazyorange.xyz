@@ -16,7 +16,7 @@
 			"vs-kubernetes.helm-path": "/usr/local/bin/helm",
 			"vs-kubernetes.kubectlVersioning": "user-provided",
 			"vs-kubernetes.outputFormat": "yaml",
-			"vs-kubernetes.kubeconfig": "",
+			"vs-kubernetes.kubeconfig": "/workspaces/staging.lazyorange.xyz/.kube/config",
 			"vs-kubernetes.knownKubeconfigs": [],
 			"vs-kubernetes.autoCleanupOnDebugTerminate": false,
 			"vs-kubernetes.nodejs-autodetect-remote-root": true,
