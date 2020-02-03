@@ -19,9 +19,9 @@ module "gitlab_eks_cluster" {
   root_gitlab_project = var.root_gitlab_project
   root_gitlab_group   = var.root_gitlab_group
 
-  kubernetes_endpoint = data.aws_eks_cluster.default.*.endpoint
-  kubernetes_token    = data.aws_eks_cluster_auth.default.*.token
-  kubernetes_ca_cert  = data.aws_eks_cluster.default.*.certificate_authority.0.data
+  kubernetes_endpoint = data.aws_eks_cluster.default.endpoint
+  kubernetes_token    = data.aws_eks_cluster_auth.default.token
+  kubernetes_ca_cert  = data.aws_eks_cluster.default.certificate_authority.0.data
 }
 
 locals {
