@@ -154,9 +154,12 @@ build_aws_ami:
   script:
   - packer build packer.json
   only:
+    changes:
+    - packer.json
     variables:
     - $AWS_ACCESS_KEY_ID
     - $AWS_SECRET_ACCESS_KEY
+  allow_failure: true
 
 .auto-configure:
   image: $CI_IMAGE_NAME
