@@ -10,9 +10,7 @@ rm -rf $WORKDIR && mkdir -p $WORKDIR && cd $WORKDIR
 wget "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
 unzip "packer_${PACKER_VERSION}_linux_amd64.zip"
 
-mv ./packer /usr/local/bin/packer
+mv $WORKDIR/packer /usr/local/bin/packer
 chmod +x /usr/local/bin/packer
-
-rm -rf $WORKDIR
 
 packer version
