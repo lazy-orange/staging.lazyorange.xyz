@@ -30,7 +30,7 @@
             "type": "shell",
             "inline": [
                 "sudo apt-get update",
-                "sudo apt-get install -qy python python-pip",
+                "sudo apt-get install -qy unzip python python-pip",
                 "sudo pip install awscli",
                 "wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64",
                 "sudo mv jq-linux64 /usr/local/bin/jq && sudo chmod +x /usr/local/bin/jq && jq --version"
