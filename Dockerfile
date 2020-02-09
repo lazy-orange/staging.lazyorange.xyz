@@ -12,6 +12,8 @@ ARG helm_ver=v2.15.1
 ENV HELM_VER $helm_ver
 RUN /scripts/install_helm.sh
 
+RUN helm init -c && helm plugin install https://github.com/rimusz/helm-tiller
+
 # ==> Install Terraform
 ARG terraform_ver=0.12.18
 ENV TERRAFORM_VERSION $terraform_ver
@@ -20,8 +22,6 @@ RUN curl -LO https://raw.github.com/robertpeteuil/terraform-installer/master/ter
 RUN ./terraform-install.sh -i $TERRAFORM_VERSION
 # Check that it's installed
 RUN terraform --version 
-
-RUN helm init -c && helm plugin install https://github.com/rimusz/helm-tiller
 
 # ==> Install helmfile
 ARG helmfile_ver=v0.94.1
@@ -50,5 +50,10 @@ RUN apt-get install direnv zsh -yq && sh -c "$(curl -fsSL https://raw.github.com
     && curl -sL https://howtowhale.github.io/dvm/downloads/latest/install.sh | sh \
     && echo 'source /root/.dvm/dvm.sh && dvm detect' >> $HOME/.zshrc \
     && echo '[[ -r $DVM_DIR/bash_completion ]] && . $DVM_DIR/bash_completion' >> $HOME/.zshrc
+
+# ==> Install Packer (https://packer.io/) (not required by Gitlab Pipelines)
+# ARG packer_ver=1.5.1
+# ENV PACKER_VER $packer_ver
+# RUN /scripts/install_packer.sh
 
 RUN apt-get remove -qy wget unzip python-pip && apt-get clean
