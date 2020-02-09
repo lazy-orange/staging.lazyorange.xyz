@@ -51,7 +51,7 @@ before_script:
 - terraform init $TERRAFORM_DIR
 
 stages:
-- docker
+- prepare
 - validate
 - build
 - test
@@ -126,7 +126,7 @@ destroy with delay:
 docker-build-master:
   # Official docker image.
   image: docker:latest
-  stage: docker
+  stage: prepare
   services:
   - docker:dind
   before_script:
@@ -146,6 +146,7 @@ docker-build-master:
 
 build_aws_ami:
   image: bitnami/minideb:stretch
+  stage: prepare
   before_script:
   - packer validate packer.json
   - apt-get update && apt-get install -qy wget unzip curl git procps
