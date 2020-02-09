@@ -148,9 +148,9 @@ build_aws_ami:
   image: bitnami/minideb:stretch
   stage: prepare
   before_script:
-  - packer validate packer.json
   - apt-get update && apt-get install -qy wget unzip curl git procps
   - ./scripts/install_packer.sh
+  - packer validate packer.json
   script:
   - packer build packer.json
   only:
