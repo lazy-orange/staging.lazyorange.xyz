@@ -8,6 +8,7 @@ variables:
   HELM_VER: v2.15.1
   HELMFILE_VERSION: v0.94.1 # https://github.com/roboll/helmfile/releases
   DOCTL_VERSION: 1.36.0 # https://github.com/digitalocean/doctl/releases
+  PACKER_VER: 1.5.1 # https://packer.io/
   TERRAFORM_VERSION: 0.12.18 # https://releases.hashicorp.com/terraform/
   #
   KUBEHOME_DIR: $CI_PROJECT_DIR/.kube
@@ -142,6 +143,19 @@ docker-build-master:
     changes:
     - Dockerfile
     - helmfile.d/*
+
+build_aws_ami:
+  image: bitnami/minideb:stretch
+  before_script:
+  - packer validate packer.json
+  - apt-get update && apt-get install -qy wget unzip curl git procps
+  - ./scripts/install_packer.sh
+  script:
+  - packer build packer.json
+  only:
+    variables:
+    - $AWS_ACCESS_KEY_ID
+    - $AWS_SECRET_ACCESS_KEY
 
 .auto-configure:
   image: $CI_IMAGE_NAME
