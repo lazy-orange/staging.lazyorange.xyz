@@ -1,0 +1,65 @@
+{
+    "variables": {
+        "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+        "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+        "helm_ver": "{{env `HELM_VER`}}",
+        "kubectl_ver": "{{env `KUBECTL_VER`}}",
+        "helmfile_ver": "{{env `HELMFILE_VERSION`}}",
+        "doctl_ver": "{{env `DOCTL_VERSION`}}",
+        "terraform_ver": "{{env `TERRAFORM_VERSION`}}"
+    },
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "access_key": "{{user `aws_access_key`}}",
+            "secret_key": "{{user `aws_secret_key`}}",
+            "region": "eu-central-1",
+            "source_ami": "ami-0b418580298265d5c",
+            "instance_type": "t2.micro",
+            "ssh_username": "ubuntu",
+            "tags": {
+                "OS_Version": "Ubuntu",
+                "Terraform": "{{user `terraform_ver`}}"
+            },
+            "ami_name": "Kitchen {{timestamp}}",
+            "ami_description": "A list of tools are required to work with Gitlab and Kubernetes (AWS EKS / DOKS)"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": [
+                "sudo apt-get update && sudo apt-get install -yq unzip"
+            ]
+        },
+        {
+            "type": "shell",
+            "scripts": [
+                "./scripts/install_doctl.sh",
+                "./scripts/install_eksctl.sh",
+                "./scripts/install_helm.sh",
+                "./scripts/install_helm_plugins.sh",
+                "./scripts/install_helmfile.sh",
+                "./scripts/install_kubectl.sh",
+                "./scripts/install_terraform.sh"
+            ],
+            "execute_command": "chmod +x {{ .Path }}; sudo {{ .Vars }} {{ .Path }}",
+            "environment_vars": [
+                "DOCTL_VERSION={{user `doctl_ver`}}",
+                "HELM_VER={{user `helm_ver`}}",
+                "HELMFILE_VERSION={{user `helmfile_ver`}}",
+                "KUBECTL_VERSION={{user `kubectl_ver`}}",
+                "TERRAFORM_VERSION={{user `terraform_ver`}}",
+                "PACKER_VERSION=1.5.1"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "sleep 30",
+                "sudo apt-get update",
+                "sudo apt-get install -y docker.io"
+            ]
+        }
+    ]
+}
