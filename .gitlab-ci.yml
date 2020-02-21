@@ -246,7 +246,8 @@ build_aws_ami:
     variables:
     - $TERRAFORM_DISABLED == "yes"
 
+# in this branch `local` directive is replaced by `remote` to make possible include this .gitlab-ci.yml itself from another repo
 include:
-- local: .gitlab/ci/templates/Jobs/Auto-Ingress.gitalb-ci.yml
-- local: .gitlab/ci/templates/Jobs/Gitlab-Runner.gitlab-ci.yml
-- local: .gitlab/ci/templates/Jobs/Cluster-AutoScaler.gitlab-ci.yml
+- remote: https://gitlab.com/lazyorangejs/staging.lazyorange.xyz/-/raw/master/.gitlab/ci/templates/Jobs/Auto-Ingress.gitalb-ci.yml
+- remote: https://gitlab.com/lazyorangejs/staging.lazyorange.xyz/-/raw/master/.gitlab/ci/templates/Jobs/Gitlab-Runner.gitlab-ci.yml
+- remote: https://gitlab.com/lazyorangejs/staging.lazyorange.xyz/-/raw/master/.gitlab/ci/templates/Jobs/Cluster-AutoScaler.gitlab-ci.yml
