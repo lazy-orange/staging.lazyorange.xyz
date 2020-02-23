@@ -213,8 +213,6 @@ build_aws_ami:
     variables:
     - $AWS_EKS_CLUSTER_ENABLED == "yes"
     - $DOKS_CLUSTER_ENABLED == "yes"
-  # dependencies:
-  # - apply
   tags:
   - docker
 
@@ -248,6 +246,12 @@ build_aws_ami:
 
 # in this branch `local` directive is replaced by `remote` to make possible include this .gitlab-ci.yml itself from another repo
 include:
-- remote: https://gitlab.com/lazyorangejs/staging.lazyorange.xyz/-/raw/master/.gitlab/ci/templates/Jobs/Auto-Ingress.gitalb-ci.yml
-- remote: https://gitlab.com/lazyorangejs/staging.lazyorange.xyz/-/raw/master/.gitlab/ci/templates/Jobs/Gitlab-Runner.gitlab-ci.yml
-- remote: https://gitlab.com/lazyorangejs/staging.lazyorange.xyz/-/raw/master/.gitlab/ci/templates/Jobs/Cluster-AutoScaler.gitlab-ci.yml
+- project: lazyorangejs/infra/gitlab-templates
+  ref: master
+  file: .gitlab/ci/templates/Jobs/Auto-Ingress.gitalb-ci.yml
+- project: lazyorangejs/infra/gitlab-templates
+  ref: master
+  file: .gitlab/ci/templates/Jobs/Gitlab-Runner.gitlab-ci.yml
+- project: lazyorangejs/infra/gitlab-templates
+  ref: master
+  file: .gitlab/ci/templates/Jobs/Cluster-AutoScaler.gitlab-ci.yml
