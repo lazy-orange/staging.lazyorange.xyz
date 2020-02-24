@@ -166,7 +166,9 @@ build_aws_ami:
 
 .destroy:
   stage: destroy
-  extends: .terraform
+  extends:
+  - .before-script
+  - .terraform
   environment:
     name: production
   script:
