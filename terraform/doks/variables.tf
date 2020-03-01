@@ -31,6 +31,12 @@ variable "gitlab_runner_installed" {
   default = false
 }
 
+variable "kubernetes_version" {
+  type        = string
+  default     = "1.15.9-do.0"
+  description = "Desired Kubernetes master version. If you do not specify a value, the latest available version is used"
+}
+
 variable "gitlab_runner_ng" {
   type = object({
     ng = object({
