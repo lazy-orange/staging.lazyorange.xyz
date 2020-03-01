@@ -139,12 +139,11 @@ docker-build-master:
   only:
     refs:
     - master
-    - 1-add-support-for-doks-digital-ocean-kubernetes
     changes:
     - Dockerfile
     - helmfile.d/*
 
-build_aws_ami:
+build-aws-ami:
   image: bitnami/minideb:stretch
   stage: prepare
   before_script:
@@ -159,6 +158,9 @@ build_aws_ami:
     variables:
     - $AWS_ACCESS_KEY_ID
     - $AWS_SECRET_ACCESS_KEY
+  except:
+    variables:
+    - $PACKER_DISABLED == "yes"
   allow_failure: true
 
 .auto-configure:
@@ -211,7 +213,6 @@ build_aws_ami:
   only:
     refs:
     - master
-    - 1-add-support-for-doks-digital-ocean-kubernetes
     variables:
     - $AWS_EKS_CLUSTER_ENABLED == "yes"
     - $DOKS_CLUSTER_ENABLED == "yes"
@@ -222,7 +223,6 @@ build_aws_ami:
   only:
     refs:
     - master
-    - 1-add-support-for-doks-digital-ocean-kubernetes
     variables:
     - $DOKS_CLUSTER_ENABLED == "yes"
     - $AWS_EKS_CLUSTER_ENABLED == "yes"
