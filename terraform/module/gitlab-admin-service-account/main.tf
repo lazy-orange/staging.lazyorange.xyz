@@ -27,6 +27,7 @@ resource "kubernetes_cluster_role_binding" "gitlab_admin_cluster_role_binding" {
   }
 }
 
+// TODO: moved to gitlab-kube-cluster module, remove this in future release
 resource "kubernetes_namespace" "tillerless" {
   count = var.create_tillerless_ns && var.enabled ? 1 : 0
 

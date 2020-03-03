@@ -3,6 +3,10 @@ variable "enabled" {
   default = true
 }
 
+variable "cluster_name" {
+  type = string
+}
+
 variable "stage" {
   type        = string
   description = "Stage, e.g. 'prod', 'staging', 'dev' or 'testing'"
@@ -13,10 +17,6 @@ variable "dns_zone" {
   description = "specifies the DNS suffix for the externally-visible websites and services deployed in the cluster"
 }
 
-variable "cluster_name" {
-  type = string
-}
-
 variable "group_gitlab_runner_enabled" {
   type        = bool
   description = "Setup a gitlab group runner (will be used a group runner token to set GITLAB_RUNNER_TOKEN env variable)"
@@ -24,28 +24,20 @@ variable "group_gitlab_runner_enabled" {
 }
 
 variable "root_gitlab_group" {
-  type    = string
-  default = ""
+  type = string
 }
 
 variable "root_gitlab_project" {
-  type        = number
-  description = "A gitlab project id, a project will be used as a CI to manage Kubernetes clusters"
+  type        = string
+  description = "A project id that acts as a Gitlab Manage repo, will be used to setup a few environment variables to properly setup other CI jobs"
 }
 
-variable "kubernetes_endpoint" {
-  type = string
-}
-
-variable "kubernetes_token" {
-  type = string
-}
-
-variable "kubernetes_ca_cert" {
-  type = string
-}
-
-variable "create_tillerless_ns" {
+variable "gitlab_runner_installed" {
   type    = bool
   default = false
+}
+
+variable "kubernetes_version" {
+  type    = string
+  default = "1.15.9-do.0"
 }

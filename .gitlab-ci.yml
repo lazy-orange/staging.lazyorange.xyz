@@ -139,12 +139,11 @@ docker-build-master:
   only:
     refs:
     - master
-    - 1-add-support-for-doks-digital-ocean-kubernetes
     changes:
     - Dockerfile
     - helmfile.d/*
 
-build_aws_ami:
+build-aws-ami:
   image: bitnami/minideb:stretch
   stage: prepare
   before_script:
@@ -159,6 +158,9 @@ build_aws_ami:
     variables:
     - $AWS_ACCESS_KEY_ID
     - $AWS_SECRET_ACCESS_KEY
+  except:
+    variables:
+    - $PACKER_DISABLED == "yes"
   allow_failure: true
 
 .auto-configure:
@@ -166,7 +168,9 @@ build_aws_ami:
 
 .destroy:
   stage: destroy
-  extends: .terraform
+  extends:
+  - .before-script
+  - .terraform
   environment:
     name: production
   script:
@@ -212,8 +216,6 @@ build_aws_ami:
     variables:
     - $AWS_EKS_CLUSTER_ENABLED == "yes"
     - $DOKS_CLUSTER_ENABLED == "yes"
-  # dependencies:
-  # - apply
   tags:
   - docker
 
@@ -244,7 +246,14 @@ build_aws_ami:
     variables:
     - $TERRAFORM_DISABLED == "yes"
 
+# in this branch `local` directive is replaced by `remote` to make possible include this .gitlab-ci.yml itself from another repo
 include:
-- local: .gitlab/ci/templates/Jobs/Auto-Ingress.gitalb-ci.yml
-- local: .gitlab/ci/templates/Jobs/Gitlab-Runner.gitlab-ci.yml
-- local: .gitlab/ci/templates/Jobs/Cluster-AutoScaler.gitlab-ci.yml
+- project: lazyorangejs/infra/gitlab-templates
+  ref: master
+  file: .gitlab/ci/templates/Jobs/Auto-Ingress.gitalb-ci.yml
+- project: lazyorangejs/infra/gitlab-templates
+  ref: master
+  file: .gitlab/ci/templates/Jobs/Gitlab-Runner.gitlab-ci.yml
+- project: lazyorangejs/infra/gitlab-templates
+  ref: master
+  file: .gitlab/ci/templates/Jobs/Cluster-AutoScaler.gitlab-ci.yml
