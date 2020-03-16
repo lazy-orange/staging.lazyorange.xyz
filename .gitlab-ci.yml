@@ -33,6 +33,8 @@ variables:
   CREATE_NAMESPACE_IF_MISSING: "true" # indicate whether the namespace should be created if it does not exist
   HELM_HOST: localhost:44134
   TILLER_NAMESPACE: tillerless
+  #
+  GITLAB_TEMPLATES_REPO: lazyorangejs/staging.lazyorange.xyz
 
 image:
   name: $CI_IMAGE_NAME
@@ -248,12 +250,12 @@ build-aws-ami:
 
 # in this branch `local` directive is replaced by `remote` to make possible include this .gitlab-ci.yml itself from another repo
 include:
-- project: lazyorangejs/infra/gitlab-templates
+- project: lazyorangejs/staging.lazyorange.xyz
   ref: master
   file: .gitlab/ci/templates/Jobs/Auto-Ingress.gitalb-ci.yml
-- project: lazyorangejs/infra/gitlab-templates
+- project: lazyorangejs/staging.lazyorange.xyz
   ref: master
   file: .gitlab/ci/templates/Jobs/Gitlab-Runner.gitlab-ci.yml
-- project: lazyorangejs/infra/gitlab-templates
+- project: lazyorangejs/staging.lazyorange.xyz
   ref: master
   file: .gitlab/ci/templates/Jobs/Cluster-AutoScaler.gitlab-ci.yml
