@@ -1,0 +1,27 @@
+# Builds the docker image, includes tools that might you want to use on the next stages
+# Notice, that the $CI_IMAGE_NAME enviroment variables will be used in the next stage and 
+# based on the some env variables
+# The versions of terraform and helmfile are defined on top of gitlab ci file, you can set others values
+# - TERRAFORM_VERSION
+# - HELMFILE_VERSION
+docker-build-master:
+  # Official docker image.
+  image: docker:latest
+  stage: prepare
+  services:
+  - docker:dind
+  before_script:
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+  - docker build --pull -t "$CI_IMAGE_NAME" --build-arg TERRAFORM_VERSION=$TERRAFORM_VERSION --build-arg HELM_VER=$HELM_VER --build-arg KUBECTL_VER=$KUBECTL_VER --build-arg HELMFILE_VERSION=$HELMFILE_VERSION --build-arg DOCTL_VERSION=$DOCTL_VERSION .
+  - docker push "$CI_IMAGE_NAME"
+  except:
+    variables:
+    # you can use this variable in order to skip docker build job during testing scheduled jobs
+    - $DOCKER_BUILD_DISABLED == "yes"
+  only:
+    refs:
+    - master
+    changes:
+    - Dockerfile
+    - helmfile.d/*
