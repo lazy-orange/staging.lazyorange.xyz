@@ -18,7 +18,7 @@ releases:
   labels:
     chart: "external-dns"
     repo: "stable"
-    component: "ingress"
+    component: "dns"
     namespace: "kube-system"
     vendor: "kubernetes-incubator"
     default: "true"
