@@ -8,8 +8,8 @@ deploy_httpbin:
   - .before-script
   - .general
   script:
-  - helmfile -l chart=httpbin list
-  - helm tiller run -- helmfile -l chart=httpbin sync --skip-deps
+  - helmfile -l name=httpbin list
+  - helm tiller run -- helmfile -l name=httpbin sync --skip-deps
   only:
     variables:
     - $HTTPBIN_INSTALLED
