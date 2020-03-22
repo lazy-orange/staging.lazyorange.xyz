@@ -3,3 +3,4 @@ helmfiles:
 - ./ingress
 - ./rancher
 - ./gitlab/*
+- ./testing/*

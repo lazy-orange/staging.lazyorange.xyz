@@ -1,0 +1,32 @@
+releases:
+################################################################################
+## External DNS ################################################################
+################################################################################
+
+#
+# References:
+#   - https://github.com/kubernetes/charts/blob/master/stable/external-dns/values.yaml
+#   - https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md
+#
+- name: "httpbin"
+  namespace: "testing"
+  labels:
+    chart: "httpbin"
+    repo: "stable"
+    component: "testing"
+    namespace: "testing"
+    default: "false"
+  chart: "../../charts/httpbin"
+  version: "0.1.0"
+  wait: true
+  installed: {{ env "HTTPBIN_INSTALLED" | default "false" }}
+  values:
+    - ingress:
+        enabled: true
+        hosts:
+        - host: {{ requiredEnv "HTTPBIN_HOSTNAME" }}
+          paths: [ '/' ]
+        tls:
+        - secretName: httpbin-tls
+          hosts:
+          - {{ requiredEnv "HTTPBIN_HOSTNAME" }}
