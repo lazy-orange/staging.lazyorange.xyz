@@ -3,4 +3,4 @@ helmfiles:
 - ./ingress
 - ./rancher
 - ./gitlab/*
-- ./testing/*
+- ./testing/httpbin.yaml
