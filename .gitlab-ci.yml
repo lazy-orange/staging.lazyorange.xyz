@@ -60,6 +60,7 @@ stages:
 - deploy
 - gitlab
 - infra
+- testing
 - destroy
 
 validate:
@@ -259,3 +260,6 @@ include:
 - project: lazyorangejs/staging.lazyorange.xyz
   ref: master
   file: .gitlab/ci/templates/Jobs/Cluster-AutoScaler.gitlab-ci.yml
+- project: lazyorangejs/staging.lazyorange.xyz
+  ref: 7-configure-external-dns-settings-doks
+  file: .gitlab/ci/templates/Jobs/Testing.gitalb-ci.yml

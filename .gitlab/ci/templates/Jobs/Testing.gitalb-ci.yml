@@ -1,0 +1,15 @@
+.auto-configure:
+  image: $CI_IMAGE_NAME
+
+deploy_httpbin:
+  stage: testing
+  extends:
+  - .auto-configure
+  - .before-script
+  - .general
+  script:
+  - helmfile -l chart=httpbin list
+  - helm tiller run -- helmfile -l chart=httpbin sync --skip-deps
+  only:
+    variables:
+    - $HTTPBIN_INSTALLED

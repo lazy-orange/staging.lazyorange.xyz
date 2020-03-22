@@ -1,22 +1,22 @@
-releases:
-################################################################################
-## External DNS ################################################################
-################################################################################
+repositories:
+# Stable repo of official helm charts
+- name: "lazyorange"
+  url: "https://gitlab.com/lazyorangejs/staging.lazyorange.xyz/-/raw/98a54fbd36383e7a2177bff8fbe2b4607e7efefc/charts/index"
 
+releases:
 #
 # References:
-#   - https://github.com/kubernetes/charts/blob/master/stable/external-dns/values.yaml
-#   - https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md
+#   - https://gitlab.com/lazyorangejs/staging.lazyorange.xyz/-/merge_requests/9
 #
 - name: "httpbin"
   namespace: "testing"
   labels:
     chart: "httpbin"
-    repo: "stable"
+    repo: "lazyorange"
     component: "testing"
     namespace: "testing"
     default: "false"
-  chart: "../../charts/httpbin"
+  chart: "lazyorange/httpbin"
   version: "0.1.0"
   wait: true
   installed: {{ env "HTTPBIN_INSTALLED" | default "false" }}
