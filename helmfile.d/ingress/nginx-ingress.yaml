@@ -41,6 +41,9 @@ releases:
           ### Optional: NGINX_INGRESS_IMAGE_TAG; e.g. 0.25.1
           tag: '{{ env "NGINX_INGRESS_IMAGE_TAG" | default "0.26.1" }}'
           pullPolicy: "IfNotPresent"
+        publishService:
+          enabled: '{{ env "NGINX_INGRESS_PUBLISH_SERVICE" | default "false" }}'
+          # pathOverride: 'ingress/ingress-nginx-ingress-controller'NGINX_INGRESS_PUBLISH_SERVICE
         ### Optional: NGINX_INGRESS_REPLICA_COUNT; Used only if `kind=Deployment` e.g. 4
         replicaCount: '{{ env "NGINX_INGRESS_REPLICA_COUNT" | default "1" }}'
         enableHttps: true
