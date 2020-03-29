@@ -34,7 +34,7 @@ variables:
   HELM_HOST: localhost:44134
   TILLER_NAMESPACE: tillerless
   #
-  GITLAB_TEMPLATES_REPO: lazyorangejs/staging.lazyorange.xyz
+  CERT_MANAGER_INGRESS_SHIM_DEFAULT_ISSUER_NAME: "letsencrypt-prod"
 
 image:
   name: $CI_IMAGE_NAME
@@ -60,6 +60,7 @@ stages:
 - deploy
 - gitlab
 - infra
+- testing
 - destroy
 
 validate:
@@ -259,3 +260,5 @@ include:
 - project: lazyorangejs/staging.lazyorange.xyz
   ref: master
   file: .gitlab/ci/templates/Jobs/Cluster-AutoScaler.gitlab-ci.yml
+- project: lazyorangejs/staging.lazyorange.xyz
+  file: .gitlab/ci/templates/Jobs/Testing.gitalb-ci.yml

@@ -1,0 +1,36 @@
+repositories:
+- name: gitlab
+  url: https://charts.gitlab.io/
+
+releases:
+#
+# References:
+#   - https://charts.gitlab.io/
+#   - https://gitlab.com/gitlab-org/charts/auto-deploy-app/-/tree/v0.6.0
+#   - https://gitlab.com/lazyorangejs/staging.lazyorange.xyz/-/merge_requests/9
+#
+- name: "httpbin"
+  namespace: "testing"
+  labels:
+    repo: "gitlab"
+    component: "testing"
+    namespace: "testing"
+    vendor: "gitlab"
+    default: "false"
+  chart: "gitlab/auto-deploy-app"
+  version: "0.6.0"
+  wait: true
+  installed: {{ env "HTTPBIN_INSTALLED" | default "false" }}
+  values:
+    - ingress:
+        tls:
+          enabled: true
+      service:
+        url: {{ requiredEnv "HTTPBIN_HOSTNAME" }}
+        externalPort: 80
+        internalPort: 80
+      image:
+        repository: docker.io/kennethreitz/httpbin
+        tag: latest
+      postgresql:
+        enabled: false

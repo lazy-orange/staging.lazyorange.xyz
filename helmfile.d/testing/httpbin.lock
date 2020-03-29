@@ -1,0 +1,6 @@
+dependencies:
+- name: auto-deploy-app
+  repository: https://charts.gitlab.io/
+  version: 0.6.0
+digest: sha256:f84b3f2bb85ea65808cb1c62de35f1637195633e5d043b6332c204df5b835af7
+generated: "2020-03-22T09:52:08.1230809Z"
