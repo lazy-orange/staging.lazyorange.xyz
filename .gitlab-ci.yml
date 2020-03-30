@@ -253,7 +253,7 @@ build-aws-ami:
 # in this branch `local` directive is replaced by `remote` to make possible include this .gitlab-ci.yml itself from another repo
 include:
 - project: lazyorangejs/staging.lazyorange.xyz
-  file: .gitlab/ci/templates/Jobs/Lint-Helmfile.gitalb-ci.yml
+  file: .gitlab/ci/templates/Jobs/Lint-Helmfile.gitlab-ci.yml
 - project: lazyorangejs/staging.lazyorange.xyz
   ref: master
   file: .gitlab/ci/templates/Jobs/Auto-Ingress.gitalb-ci.yml
