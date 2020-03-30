@@ -1,0 +1,9 @@
+variables:
+  HTTPBIN_HOSTNAME: $KUBE_INGRESS_BASE_DOMAIN
+
+lint_helmfile:
+  stage: lint
+  script:
+  - helmfile list
+  - helmfile deps
+  - helmfile lint

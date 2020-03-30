@@ -108,7 +108,7 @@ releases:
     component: "cert-manager"
     namespace: "cert-manager"
     default: "true"
-  version: "0.1.0"
+  version: "0.2.3"
   wait: true
   force: true
   atomic: true

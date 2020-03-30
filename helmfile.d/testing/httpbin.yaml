@@ -26,7 +26,7 @@ releases:
         tls:
           enabled: true
       service:
-        url: {{ requiredEnv "HTTPBIN_HOSTNAME" }}
+        url: {{ env "HTTPBIN_HOSTNAME" | default "httpbin.staging.lazyorange.xyz" }}
         externalPort: 80
         internalPort: 80
       image:

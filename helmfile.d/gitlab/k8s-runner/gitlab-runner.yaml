@@ -20,7 +20,8 @@ releases:
     vendor: "gitlab"
     default: "false"
   chart: "gitlab/gitlab-runner"
-  version: "0.10.1"
+  # version: "0.10.1"
+  version: "0.15.0"
   installed: {{ env "GITLAB_RUNNER_INSTALLED" | default "false" }}
   wait: true
   values:
