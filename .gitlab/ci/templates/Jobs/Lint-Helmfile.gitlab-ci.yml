@@ -3,7 +3,8 @@ variables:
 
 lint_helmfile:
   stage: lint
+  extends:
+  - .before-script
   script:
   - helmfile list
-  - helmfile deps
   - helmfile lint
