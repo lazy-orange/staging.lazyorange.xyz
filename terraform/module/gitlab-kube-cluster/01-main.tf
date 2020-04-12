@@ -76,5 +76,5 @@ resource "gitlab_group_cluster" "root" {
   ## References:
   ## - https://docs.gitlab.com/12.5/ee/topics/autodevops/index.html#overview
   ## - https://gitlab.com/gitlab-org/gitlab-foss/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml
-  environment_scope = "*"
+  environment_scope = local.environment_scope
 }
