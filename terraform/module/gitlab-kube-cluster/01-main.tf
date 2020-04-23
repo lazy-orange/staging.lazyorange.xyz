@@ -56,6 +56,10 @@ resource "gitlab_project_cluster" "root" {
   kubernetes_ca_cert = base64decode(local.kubernetes_ca_cert)
 
   environment_scope = local.environment_scope
+
+  lifecycle {
+    ignore_changes = [ kubernetes_ca_cert ]
+  }
 }
 
 resource "gitlab_group_cluster" "root" {
@@ -77,4 +81,8 @@ resource "gitlab_group_cluster" "root" {
   ## - https://docs.gitlab.com/12.5/ee/topics/autodevops/index.html#overview
   ## - https://gitlab.com/gitlab-org/gitlab-foss/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml
   environment_scope = local.environment_scope
+
+  lifecycle {
+    ignore_changes = [ kubernetes_ca_cert ]
+  }
 }
