@@ -9,6 +9,9 @@ lint_helmfile:
   - helmfile list
   - helmfile deps
   - helmfile lint
+  except:
+    variables:
+    - $HELMFILE_LINT_DISABLED == "yes"
 
 .before-helmfile-script:
   before_script:
