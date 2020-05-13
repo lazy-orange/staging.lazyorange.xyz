@@ -1,6 +1,9 @@
 locals {
   environment_scope                = var.stage
-  group_cluster_autoscaler_enabled = length(var.root_gitlab_group) > 0 ? 1 : 0
+  group_cluster_enabled            = length(var.root_gitlab_group) > 0 ? 1 : 0
+  project_cluster_enabled          = length(var.root_gitlab_project) > 0 ? 1 : 0
+
+  enabled                          = (var.enabled == true && local.group_cluster_enabled == 1 && local.project_cluster_enabled == 0) ? 1 : 0
   group_gitlab_runner_enabled      = (var.group_gitlab_runner_enabled && length(var.root_gitlab_group) > 0) ? 1 : 0
 }
 
@@ -13,21 +16,15 @@ locals {
   kubernetes_ca_cert  = var.kubernetes_ca_cert
 }
 
-# In the next steps we will add a few env variables to Gitlab CI variables 
-# to make possible run CI jobs that depends on these variables 
-data "gitlab_project" "root" {
-  id = var.root_gitlab_project
-}
-
 data "gitlab_group" "root" {
   count    = length(var.root_gitlab_group) > 0 ? 1 : 0
   group_id = length(var.root_gitlab_group) > 0 ? var.root_gitlab_group : 0
 }
 
 resource "gitlab_project_variable" "gitlab_runner_token" {
-  count = local.group_gitlab_runner_enabled
+  count = local.project_cluster_enabled
 
-  project           = data.gitlab_project.root.id
+  project           = var.root_gitlab_project
   key               = "GITLAB_RUNNER_TOKEN"
   value             = join("", data.gitlab_group.root.*.runners_token)
   protected         = true
@@ -36,23 +33,27 @@ resource "gitlab_project_variable" "gitlab_runner_token" {
 
 # https://www.terraform.io/docs/providers/gitlab/r/project_cluster.html
 data "kubernetes_secret" "gitlab_admin_token" {
+  count = local.enabled
+
   metadata {
     name      = module.gitlab_admin_service_account.sa_name
     namespace = "kube-system"
   }
 }
 
+# In the next steps we will add a few env variables to Gitlab CI variables 
+# to make possible run CI jobs that depends on these variables 
 resource "gitlab_project_cluster" "root" {
-  for_each = {
-    project_cluster_sandbox = data.gitlab_project.root.id
-  }
-  project = each.value
+  count = (var.enabled == true && local.project_cluster_enabled == 1) ? 1 : 0
+
+  project = var.root_gitlab_project
 
   name   = local.cluster_name
   domain = local.domain
 
   kubernetes_api_url = local.kubernetes_endpoint
-  kubernetes_token   = data.kubernetes_secret.gitlab_admin_token.data.token
+  // kubernetes_token   = data.kubernetes_secret.gitlab_admin_token.data.token
+  kubernetes_token   = join("", data.kubernetes_secret.gitlab_admin_token.*.data.token)
   kubernetes_ca_cert = base64decode(local.kubernetes_ca_cert)
 
   environment_scope = local.environment_scope
@@ -63,15 +64,14 @@ resource "gitlab_project_cluster" "root" {
 }
 
 resource "gitlab_group_cluster" "root" {
-  count = local.group_cluster_autoscaler_enabled
-
-  group = join("", data.gitlab_group.root.*.id)
+  count = (var.enabled == true && local.group_cluster_enabled == 1) ? 1 : 0
+  group = var.root_gitlab_group
 
   name   = local.cluster_name
   domain = local.domain
 
+  kubernetes_token   = join("", data.kubernetes_secret.gitlab_admin_token.*.data.token)
   kubernetes_api_url = local.kubernetes_endpoint
-  kubernetes_token   = data.kubernetes_secret.gitlab_admin_token.data.token
   kubernetes_ca_cert = base64decode(local.kubernetes_ca_cert)
 
   ## You can use only one Kubernetes cluster per a group/project when your team uses a free plan on Gitlab.com

@@ -29,7 +29,8 @@ variable "root_gitlab_group" {
 }
 
 variable "root_gitlab_project" {
-  type        = number
+  type        = string
+  default     = ""
   description = "A gitlab project id, a project will be used as a CI to manage Kubernetes clusters"
 }
 
